@@ -1,6 +1,7 @@
 package com.example.sologym.database.entity
 
 import androidx.room.Entity
+import androidx.room.ColumnInfo
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
@@ -21,5 +22,6 @@ data class Serie(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val exercicioId: Long,
     val ordem: Int,
-    val repeticoes: Int
+    val repeticoes: Int,
+    @ColumnInfo(defaultValue = "0") val carga: Double = 0.0
 )

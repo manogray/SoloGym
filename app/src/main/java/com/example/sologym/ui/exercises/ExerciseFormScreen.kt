@@ -93,6 +93,13 @@ fun ExerciseFormScreen(
                             modifier = Modifier.weight(1f),
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                         )
+                        OutlinedTextField(
+                            value = serie.carga,
+                            onValueChange = { viewModel.onSerieCargaChange(index, it) },
+                            label = { Text("CARGA (KG)") },
+                            modifier = Modifier.weight(1f),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+                        )
                         IconButton(onClick = { viewModel.removeSerie(index) }) {
                             Icon(Icons.Default.Delete, contentDescription = "REMOVE SERIES")
                         }

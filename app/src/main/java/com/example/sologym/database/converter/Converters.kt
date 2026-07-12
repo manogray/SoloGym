@@ -4,6 +4,7 @@ import androidx.room.TypeConverter
 import com.example.sologym.model.WorkoutStatus
 import java.time.DayOfWeek
 import java.time.LocalDateTime
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 class Converters {
@@ -18,6 +19,12 @@ class Converters {
     fun dateToTimestamp(date: LocalDateTime?): String? {
         return date?.format(formatter)
     }
+
+    @TypeConverter
+    fun fromLocalDate(value: String?): LocalDate? = value?.let(LocalDate::parse)
+
+    @TypeConverter
+    fun localDateToString(date: LocalDate?): String? = date?.toString()
 
     @TypeConverter
     fun fromDayOfWeek(value: Int?): DayOfWeek? {

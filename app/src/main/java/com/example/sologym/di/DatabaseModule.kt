@@ -22,7 +22,12 @@ object DatabaseModule {
             context,
             SoloGymDatabase::class.java,
             "solo_gym.db"
-        ).build()
+        )
+            .addMigrations(
+                SoloGymDatabase.MIGRATION_1_2,
+                SoloGymDatabase.MIGRATION_2_3
+            )
+            .build()
     }
 
     @Provides
@@ -42,4 +47,7 @@ object DatabaseModule {
 
     @Provides
     fun provideHistoryDao(db: SoloGymDatabase): HistoryDao = db.historyDao()
+
+    @Provides
+    fun providePlayerDao(db: SoloGymDatabase): PlayerDao = db.playerDao()
 }

@@ -15,11 +15,13 @@ O **Solo Gym** é um aplicativo Android desenvolvido em **Kotlin** utilizando **
 O aplicativo deve permitir que o usuário:
 
 * Cadastre exercícios personalizados;
+* Configure repetições e carga individualmente para cada série;
 * Organize esses exercícios em treinos separados por dia da semana;
 * Execute o treino diário;
 * Acompanhe o progresso do treino em tempo real;
 * Registrar o histórico de treinos realizados;
 * Consultar estatísticas simples sobre frequência de treinos.
+* Acompanhar level, experiência, streak e falhas por meio de um Player local.
 
 Todo o processamento deve ocorrer localmente no dispositivo do usuário, sem qualquer dependência de serviços externos.
 
@@ -155,7 +157,6 @@ Embora o projeto inicial seja pequeno, sua arquitetura deve permitir futuras fun
 Exemplos:
 
 * cronômetro de descanso;
-* controle de carga;
 * registro de peso corporal;
 * exportação de dados;
 * backup local;
@@ -178,7 +179,7 @@ Permitir que um usuário organize completamente sua rotina de musculação dentr
 O aplicativo deverá permitir que o usuário:
 
 * cadastrar exercícios personalizados;
-* configurar séries e repetições;
+* configurar séries, repetições e cargas;
 * definir tempo de descanso entre séries;
 * configurar exercícios substitutos;
 * criar treinos separados por dia da semana;
@@ -187,6 +188,7 @@ O aplicativo deverá permitir que o usuário:
 * marcar exercícios como concluídos;
 * registrar automaticamente o histórico dos treinos realizados;
 * visualizar estatísticas básicas de frequência de treino.
+* acompanhar a evolução do Player por meio da conclusão assídua dos treinos.
 
 ---
 
@@ -262,7 +264,6 @@ As funcionalidades abaixo **não devem ser implementadas nesta versão**, porém
 * sincronização em nuvem;
 * múltiplos usuários;
 * controle de peso corporal;
-* registro das cargas utilizadas;
 * gráficos de evolução;
 * modo escuro personalizado;
 * widgets Android.
@@ -322,6 +323,7 @@ Permite:
 * excluir exercícios;
 * definir séries;
 * definir repetições por série;
+* definir carga por série;
 * definir descanso entre séries;
 * definir exercícios substitutos.
 
@@ -371,7 +373,6 @@ As funcionalidades abaixo estão explicitamente fora do escopo.
 * Controle de hidratação
 * Registro de peso corporal
 * Registro de medidas
-* Registro de carga utilizada
 * Upload de arquivos
 * Armazenamento em nuvem
 
@@ -384,7 +385,7 @@ Essas funcionalidades poderão ser avaliadas em versões futuras, mas não devem
 A primeira versão será considerada concluída quando o usuário puder:
 
 1. Cadastrar exercícios.
-2. Configurar séries e repetições.
+2. Configurar repetições e cargas diferentes para cada série.
 3. Definir exercícios substitutos.
 4. Criar treinos para qualquer dia da semana.
 5. Visualizar automaticamente o treino do dia.
@@ -414,6 +415,7 @@ Cada exercício deverá possuir obrigatoriamente:
 * Nome
 * Tempo de descanso entre séries (em segundos)
 * Lista de séries
+* Repetições e carga de cada série
 * Lista de exercícios substitutos (opcional)
 
 Cada exercício deverá possuir um identificador único gerado automaticamente pelo banco de dados.
@@ -429,6 +431,7 @@ Será permitido alterar:
 * Nome
 * Quantidade de séries
 * Quantidade de repetições de cada série
+* Carga de cada série
 * Tempo de descanso
 * Exercícios substitutos
 
@@ -494,7 +497,7 @@ Caso exista treino:
 
 * mostrar todos os exercícios;
 * mostrar a ordem dos exercícios;
-* mostrar séries e repetições;
+* mostrar séries, repetições e cargas;
 * mostrar tempo de descanso;
 * permitir iniciar treino.
 
@@ -585,8 +588,14 @@ A aba Estatísticas deverá apresentar:
 * Tempo médio
 * Tempo total treinando
 * Últimos treinos
+* Level do Player
+* Experiência atual e máxima
+* Streak de treinos
+* Falhas de treino
 
 Todas as estatísticas deverão ser calculadas localmente.
+
+Os dados de progressão do Player deverão ser persistidos localmente.
 
 ---
 
@@ -610,6 +619,45 @@ As abas serão:
 2. Treinos
 3. Exercícios
 4. Estatísticas
+
+---
+
+## RF-16 — Player e Gamificação
+
+O aplicativo deverá manter um único Player local, sem exigir cadastro, login ou autenticação.
+
+O Player deverá possuir:
+
+* level, inicialmente 1;
+* experiência atual, inicialmente 0;
+* experiência máxima, inicialmente 100;
+* streak de treinos, inicialmente 0;
+* falhas de treino, inicialmente 0.
+
+Cada treino finalizado deverá conceder 20 pontos de experiência e incrementar o streak em 1.
+
+Ao atingir a experiência máxima:
+
+* incrementar o level em 1;
+* zerar a experiência atual;
+* aumentar a experiência máxima em 20%.
+
+Uma falha ocorre quando termina um dia que possuía treino programado e não existe treino concluído naquela data. Para cada falha:
+
+* incrementar as falhas de treino em 1;
+* zerar o streak;
+* descontar 10 pontos de experiência, sem permitir valor negativo.
+
+Se o Player estiver acima do level 1 e possuir menos de 10 pontos de experiência no momento da falha:
+
+* decrementar o level em 1;
+* zerar a experiência atual;
+* reduzir a experiência máxima em 20%;
+* restaurar a experiência máxima para 100 ao retornar ao level 1.
+
+O level nunca poderá ser menor que 1. Falhas sucessivas poderão reduzir o Player até level 1 com experiência atual igual a zero.
+
+Cada data deverá ser avaliada apenas uma vez. A primeira inicialização do Player não deverá aplicar penalidades retroativas aos dias anteriores à instalação da funcionalidade.
 
 ---
 
@@ -1287,6 +1335,7 @@ Cada exercício deverá exibir:
 * Nome
 * Séries
 * Repetições
+* Carga de cada série
 * Descanso
 * Botão "Substituições"
 * Checkbox de concluído
@@ -1393,19 +1442,19 @@ Exemplo:
 ```text
 Série 1
 
-12 repetições
+12 repetições — 20 kg
 
 +
 
 Série 2
 
-10 repetições
+10 repetições — 25 kg
 
 +
 
 Série 3
 
-8 repetições
+8 repetições — 30 kg
 ```
 
 Campo:
@@ -1440,9 +1489,21 @@ Objetivo:
 
 Exibir indicadores do histórico de treinos.
 
+Exibir também o progresso persistente do Player.
+
 ---
 
 ### Cards
+
+O card principal do Player deverá mostrar:
+
+* level;
+* experiência atual e máxima;
+* barra de progresso da experiência;
+* streak atual;
+* total de falhas.
+
+---
 
 Treinos da semana
 
@@ -1584,12 +1645,13 @@ Representa uma série pertencente a um exercício.
 
 ## Atributos
 
-| Campo       | Tipo |
-| ----------- | ---- |
-| id          | Long |
-| exercicioId | Long |
-| ordem       | Int  |
-| repeticoes  | Int  |
+| Campo       | Tipo   | Obrigatório | Descrição                                      |
+| ----------- | ------ | ----------- | ---------------------------------------------- |
+| id          | Long   | Sim         | Identificador único                            |
+| exercicioId | Long   | Sim         | Exercício ao qual a série pertence             |
+| ordem       | Int    | Sim         | Posição da série no exercício                  |
+| repeticoes  | Int    | Sim         | Quantidade de repetições                       |
+| carga       | Double | Sim         | Carga da série em quilogramas; padrão igual a 0 |
 
 ---
 
@@ -1597,12 +1659,12 @@ Representa uma série pertencente a um exercício.
 
 Supino
 
-| Ordem | Repetições |
-| ----- | ---------- |
-| 1     | 12         |
-| 2     | 10         |
-| 3     | 8          |
-| 4     | 8          |
+| Ordem | Repetições | Carga (kg) |
+| ----- | ---------- | ---------- |
+| 1     | 12         | 20         |
+| 2     | 10         | 25         |
+| 3     | 8          | 30         |
+| 4     | 8          | 30         |
 
 ---
 
@@ -1611,6 +1673,8 @@ Supino
 * A ordem deverá iniciar em 1.
 * Não poderão existir duas séries com a mesma ordem para o mesmo exercício.
 * A quantidade mínima de repetições é 1.
+* A carga deverá ser maior ou igual a zero e poderá ser diferente em cada série.
+* Séries existentes antes da inclusão deste campo deverão receber carga igual a zero durante a migração do banco.
 
 ---
 
@@ -1701,7 +1765,34 @@ Nenhuma informação sobre exercícios concluídos deverá ser armazenada.
 
 ---
 
-# 10.7 Enum: WorkoutStatus
+# 10.7 Entidade: Player
+
+Representa o único usuário local e sua progressão de gamificação.
+
+## Atributos
+
+| Campo                | Tipo      | Valor inicial | Descrição                                      |
+| -------------------- | --------- | ------------- | ---------------------------------------------- |
+| id                   | Int       | 1             | Identificador fixo do Player local             |
+| level                | Int       | 1             | Nível atual                                    |
+| experienciaAtual     | Int       | 0             | Experiência acumulada no nível                 |
+| experienciaMaxima    | Int       | 100           | Experiência necessária para o próximo nível    |
+| streakTreinos        | Int       | 0             | Sequência de treinos concluídos                |
+| falhasTreino         | Int       | 0             | Quantidade de dias programados não realizados  |
+| proximaDataFalha     | LocalDate | Data atual    | Controle interno para evitar falhas duplicadas |
+
+## Regras
+
+* Deverá existir somente um Player.
+* A experiência atual nunca poderá ser negativa e o level nunca poderá ser menor que 1.
+* Uma falha com XP insuficiente deverá reduzir um level quando o Player estiver acima do level 1.
+* A progressão deverá ser atualizada ao finalizar um treino.
+* A avaliação de falhas deverá considerar somente datas anteriores ao dia atual.
+* Dias sem treino programado não deverão gerar falhas.
+
+---
+
+# 10.8 Enum: WorkoutStatus
 
 Representa o estado atual do treino.
 
@@ -1739,6 +1830,7 @@ class Serie{
 +Long exercicioId
 +Int ordem
 +Int repeticoes
++Double carga
 }
 
 class Treino{
@@ -2664,9 +2756,10 @@ A escolha do substituto não altera permanentemente o treino.
 ## Fluxo
 
 1. Abrir aba Estatísticas.
-2. Sistema consulta histórico.
-3. Calcula indicadores.
-4. Exibe informações.
+2. Sistema avalia falhas de treino ainda não processadas.
+3. Sistema consulta o Player e o histórico.
+4. Calcula indicadores.
+5. Exibe progresso e informações.
 
 ---
 
@@ -3024,13 +3117,25 @@ Todas as estatísticas deverão ser calculadas dinamicamente.
 
 ### RN-22
 
-Nenhuma estatística deverá ser persistida no banco.
+As estatísticas derivadas do histórico não deverão ser persistidas no banco. Os dados de progressão do Player são estado da aplicação e deverão ser persistidos.
 
 ---
 
 ### RN-23
 
-Os cálculos deverão utilizar exclusivamente os dados presentes no histórico.
+Os cálculos de frequência e duração deverão utilizar exclusivamente os dados presentes no histórico. A gamificação deverá utilizar o Player, o histórico e a programação semanal de treinos.
+
+---
+
+### RN-24
+
+Uma mesma data não poderá gerar mais de uma falha, mesmo após fechar ou reiniciar o aplicativo.
+
+---
+
+### RN-25
+
+Concluir um treino concede 20 XP e incrementa o streak. Uma falha desconta 10 XP, incrementa o contador de falhas e zera o streak. Se esse desconto tornaria a XP negativa e o Player estiver acima do level 1, ele deverá perder um level e ter sua experiência máxima reduzida em 20%.
 
 ---
 
@@ -3114,6 +3219,7 @@ Responsável por exibir um exercício durante a execução do treino.
 * Nome do exercício
 * Séries
 * Repetições
+* Carga de cada série
 * Tempo de descanso
 * Indicador de concluído
 * Botão de substituições
@@ -3967,8 +4073,8 @@ Esses itens **não fazem parte da primeira versão** e não deverão ser impleme
 
 ## Versão 1.3
 
-* Registro do peso utilizado em cada exercício.
-* Histórico de cargas.
+* Registro da carga efetivamente utilizada durante cada treino.
+* Histórico e evolução das cargas realizadas.
 * Evolução por exercício.
 * Recordes pessoais.
 
@@ -4034,6 +4140,8 @@ O aplicativo possui quatro áreas principais:
 * Estatísticas
 
 Seu funcionamento é totalmente offline e baseado em armazenamento local.
+
+A conclusão dos treinos também alimenta um sistema local de gamificação baseado em level, experiência, streak e falhas, exibido na aba Estatísticas.
 
 A arquitetura foi projetada para ser simples, modular e preparada para futuras evoluções, mantendo separação clara entre interface, regras de negócio e persistência.
 

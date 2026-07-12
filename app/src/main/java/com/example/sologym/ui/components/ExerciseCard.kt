@@ -11,10 +11,12 @@ import androidx.compose.ui.unit.dp
 import com.example.sologym.ui.theme.*
 import androidx.compose.ui.text.style.TextDecoration
 import com.example.sologym.database.entity.Exercicio
+import com.example.sologym.database.entity.Serie
 
 @Composable
 fun ExerciseCard(
     exercicio: Exercicio,
+    series: List<Serie>,
     isCompleted: Boolean,
     onToggleCompleted: () -> Unit,
     onSubstitutesClick: () -> Unit
@@ -51,6 +53,12 @@ fun ExerciseCard(
                     text = "DESCANSO: ${exercicio.descansoSegundos}s",
                     style = MaterialTheme.typography.bodySmall
                 )
+                series.sortedBy { it.ordem }.forEach { serie ->
+                    Text(
+                        text = "SÉRIE ${serie.ordem}: ${serie.repeticoes} REPS • ${serie.carga.formatCarga()} KG",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
             }
             
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -65,3 +73,6 @@ fun ExerciseCard(
         }
     }
 }
+
+private fun Double.formatCarga(): String =
+    if (this % 1.0 == 0.0) toInt().toString() else toString()

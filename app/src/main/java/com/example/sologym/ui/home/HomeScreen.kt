@@ -62,6 +62,7 @@ fun HomeScreen(
                         val exercise = workoutExercise.exercicio.exercicio
                         ExerciseCard(
                             exercicio = exercise,
+                            series = workoutExercise.exercicio.series,
                             isCompleted = uiState.completedExercisesIds.contains(exercise.id),
                             onToggleCompleted = { viewModel.toggleExercise(exercise.id) },
                             onSubstitutesClick = { /* Show substitutes */ }

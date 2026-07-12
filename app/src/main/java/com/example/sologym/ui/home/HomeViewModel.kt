@@ -6,6 +6,7 @@ import com.example.sologym.database.entity.HistoricoTreino
 import com.example.sologym.model.WorkoutStatus
 import com.example.sologym.repository.HistoryRepository
 import com.example.sologym.repository.WorkoutRepository
+import com.example.sologym.repository.PlayerRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -18,7 +19,8 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val workoutRepository: WorkoutRepository,
-    private val historyRepository: HistoryRepository
+    private val historyRepository: HistoryRepository,
+    private val playerRepository: PlayerRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
@@ -27,6 +29,9 @@ class HomeViewModel @Inject constructor(
     private var timerJob: Job? = null
 
     init {
+        viewModelScope.launch {
+            playerRepository.evaluateMissedWorkouts()
+        }
         loadTodayWorkout()
     }
 
@@ -76,6 +81,7 @@ class HomeViewModel @Inject constructor(
                     duracaoSegundos = currentState.elapsedTime
                 )
             )
+            playerRepository.recordCompletedWorkout()
             // Reset session state
             _uiState.update { 
                 it.copy(

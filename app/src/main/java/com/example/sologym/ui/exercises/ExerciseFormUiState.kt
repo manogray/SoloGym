@@ -18,5 +18,6 @@ data class ExerciseFormUiState(
 data class SerieUiState(
     val id: Long = 0,
     val ordem: Int,
-    val repeticoes: String = ""
+    val repeticoes: String = "",
+    val carga: String = "0"
 )

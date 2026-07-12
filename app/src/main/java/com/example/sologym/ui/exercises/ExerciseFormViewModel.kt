@@ -44,7 +44,12 @@ class ExerciseFormViewModel @Inject constructor(
                             nome = completeExercise.exercicio.nome,
                             descansoSegundos = completeExercise.exercicio.descansoSegundos.toString(),
                             series = completeExercise.series.map { s -> 
-                                SerieUiState(id = s.id, ordem = s.ordem, repeticoes = s.repeticoes.toString()) 
+                                SerieUiState(
+                                    id = s.id,
+                                    ordem = s.ordem,
+                                    repeticoes = s.repeticoes.toString(),
+                                    carga = s.carga.toEditableString()
+                                )
                             },
                             selectedSubstitutesIds = completeExercise.substitutos.map { sub -> sub.id }.toSet()
                         )
@@ -71,6 +76,16 @@ class ExerciseFormViewModel @Inject constructor(
             _uiState.update { state ->
                 val newSeries = state.series.toMutableList()
                 newSeries[index] = newSeries[index].copy(repeticoes = reps)
+                state.copy(series = newSeries)
+            }
+        }
+    }
+
+    fun onSerieCargaChange(index: Int, carga: String) {
+        if (carga.isValidDecimalInput()) {
+            _uiState.update { state ->
+                val newSeries = state.series.toMutableList()
+                newSeries[index] = newSeries[index].copy(carga = carga)
                 state.copy(series = newSeries)
             }
         }
@@ -122,6 +137,11 @@ class ExerciseFormViewModel @Inject constructor(
             return
         }
 
+        if (state.series.any { it.carga.toCargaOrNull() == null }) {
+            _uiState.update { it.copy(error = "Informe uma carga válida em todas as séries") }
+            return
+        }
+
         viewModelScope.launch {
             try {
                 val exercicio = Exercicio(
@@ -134,7 +154,8 @@ class ExerciseFormViewModel @Inject constructor(
                         id = s.id,
                         exercicioId = exerciseId ?: 0,
                         ordem = s.ordem,
-                        repeticoes = s.repeticoes.toInt()
+                        repeticoes = s.repeticoes.toInt(),
+                        carga = s.carga.toCargaOrNull() ?: 0.0
                     )
                 }
                 
@@ -149,4 +170,18 @@ class ExerciseFormViewModel @Inject constructor(
             }
         }
     }
+
+    private fun String.isValidDecimalInput(): Boolean {
+        if (isEmpty()) return true
+        if (count { it == '.' || it == ',' } > 1) return false
+        return all { it.isDigit() || it == '.' || it == ',' }
+    }
+
+    private fun String.toCargaOrNull(): Double? {
+        if (isBlank()) return 0.0
+        return replace(',', '.').toDoubleOrNull()?.takeIf { it >= 0.0 }
+    }
+
+    private fun Double.toEditableString(): String =
+        if (this % 1.0 == 0.0) toInt().toString() else toString()
 }
