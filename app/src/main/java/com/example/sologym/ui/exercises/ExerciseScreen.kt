@@ -18,7 +18,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.sologym.ui.components.EmptyState
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.foundation.BorderStroke
 import com.example.sologym.ui.components.SoloTopBar
+import com.example.sologym.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -78,7 +81,12 @@ fun ExerciseScreen(
                 items(uiState.exerciseList) { exercise ->
                     Card(
                         modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                        onClick = { onEditExercise(exercise.id) }
+                        colors = CardDefaults.cardColors(
+                            containerColor = DarkBlue
+                        ),
+                        border = BorderStroke(1.dp, FullWhite),
+                        shape = RectangleShape,
+                        onClick = { onEditExercise(exercise.id) } 
                     ) {
                         Row(
                             modifier = Modifier

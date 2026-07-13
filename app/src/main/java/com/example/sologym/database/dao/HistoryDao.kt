@@ -22,6 +22,36 @@ interface HistoryDao {
     @Query("SELECT COUNT(*) FROM historico_treino WHERE data >= :start AND data < :endExclusive")
     suspend fun countByPeriodOnce(start: LocalDateTime, endExclusive: LocalDateTime): Int
 
+    @Query(
+        """
+        SELECT EXISTS(
+            SELECT 1 FROM historico_treino
+            WHERE treinoId = :workoutId
+              AND data >= :start
+              AND data < :endExclusive
+        )
+        """
+    )
+    fun observeWorkoutCompletedByPeriod(
+        workoutId: Long,
+        start: LocalDateTime,
+        endExclusive: LocalDateTime
+    ): Flow<Boolean>
+
+    @Query(
+        """
+        SELECT COUNT(*) FROM historico_treino
+        WHERE treinoId = :workoutId
+          AND data >= :start
+          AND data < :endExclusive
+        """
+    )
+    suspend fun countWorkoutByPeriodOnce(
+        workoutId: Long,
+        start: LocalDateTime,
+        endExclusive: LocalDateTime
+    ): Int
+
     @Query("SELECT SUM(duracaoSegundos) FROM historico_treino")
     fun getTotalDuration(): Flow<Long?>
 

@@ -2,7 +2,7 @@ package com.example.sologym.ui.statistics
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Analytics
+import androidx.compose.material.icons.outlined.PersonPin
 import androidx.compose.material.icons.outlined.Assignment
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -14,6 +14,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.sologym.ui.components.SoloTopBar
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.foundation.BorderStroke
+import com.example.sologym.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -24,7 +27,7 @@ fun StatisticsScreen(
 
     Scaffold(
         topBar = {
-            SoloTopBar("ESTATÍSTICAS", Icons.Outlined.Analytics)
+            SoloTopBar("JOGADOR", Icons.Outlined.PersonPin)
         },
     ) { padding ->
         Column(
@@ -62,12 +65,21 @@ private fun PlayerCard(
         0f
     }
 
-    Card(modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 8.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = DarkBlue
+        ),
+        border = BorderStroke(1.dp, FullWhite),
+        shape = RectangleShape,
+    ){
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text("PLAYER", style = MaterialTheme.typography.labelMedium)
+            Text("JOGADOR", style = MaterialTheme.typography.labelMedium)
             Text("LEVEL $level", style = MaterialTheme.typography.headlineLarge)
             Text("XP: $currentExperience / $maximumExperience")
             LinearProgressIndicator(
@@ -88,7 +100,12 @@ private fun PlayerCard(
 @Composable
 fun StatisticCard(title: String, value: String) {
     Card(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = DarkBlue
+        ),
+        border = BorderStroke(1.dp, FullWhite),
+        shape = RectangleShape,
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(text = title, style = MaterialTheme.typography.labelMedium)

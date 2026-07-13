@@ -17,9 +17,10 @@ import com.example.sologym.database.entity.*
         TreinoExercicio::class,
         ExercicioSubstituto::class,
         HistoricoTreino::class,
-        Player::class
+        Player::class,
+        ActiveWorkoutSession::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -31,6 +32,7 @@ abstract class SoloGymDatabase : RoomDatabase() {
     abstract fun substituteDao(): SubstituteDao
     abstract fun historyDao(): HistoryDao
     abstract fun playerDao(): PlayerDao
+    abstract fun activeWorkoutSessionDao(): ActiveWorkoutSessionDao
 
     companion object {
         val MIGRATION_1_2 = object : Migration(1, 2) {
@@ -51,6 +53,21 @@ abstract class SoloGymDatabase : RoomDatabase() {
                         streakTreinos INTEGER NOT NULL,
                         falhasTreino INTEGER NOT NULL,
                         proximaDataFalha TEXT NOT NULL,
+                        PRIMARY KEY(id)
+                    )
+                    """.trimIndent()
+                )
+            }
+        }
+
+        val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS active_workout_session (
+                        id INTEGER NOT NULL,
+                        workoutId INTEGER NOT NULL,
+                        startedAtEpochMillis INTEGER NOT NULL,
                         PRIMARY KEY(id)
                     )
                     """.trimIndent()

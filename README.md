@@ -10,6 +10,7 @@ O Solo Gym permite cadastrar exercícios personalizados, montar treinos para os 
 - Configuração de repetições e carga individual para cada série.
 - Configuração do tempo de descanso entre séries.
 - Definição de exercícios substitutos.
+- Seleção temporária de substitutos durante o treino, exibindo as séries, repetições, cargas e descanso da alternativa escolhida.
 - Criação de um treino para cada dia da semana.
 - Exibição automática do treino do dia.
 - Cronômetro da sessão e marcação dos exercícios concluídos.
@@ -31,6 +32,10 @@ O aplicativo está dividido em quatro áreas:
 ## Gamificação
 
 O aplicativo mantém um único Player local. Ele começa no level 1, com `0 / 100 XP`. Cada treino concluído concede 20 XP e aumenta o streak em um. Ao atingir a experiência máxima, o level aumenta, a experiência atual volta a zero e a próxima meta cresce 20%.
+
+Cada treino programado pode ser concluído apenas uma vez por dia. A aba Hoje consulta o histórico da data e passa a exibir a missão como concluída, enquanto o histórico e a recompensa do Player são salvos juntos para evitar XP duplicada.
+
+O cronômetro calcula a duração pelo tempo real transcorrido desde o início da sessão. O horário inicial e o treino em andamento são persistidos no Room, permitindo retomar automaticamente a contagem após bloqueio da tela, encerramento do processo, reinicialização do aparelho ou falta de bateria.
 
 Quando passa um dia que possuía treino programado sem que ele tenha sido concluído, uma falha é registrada, o streak volta a zero e 10 XP são descontados. Se o Player estiver acima do level 1 e não possuir XP suficiente para a penalidade, ele perde um level, sua experiência volta a zero e a experiência máxima é reduzida em 20%. O level nunca fica abaixo de 1. A verificação é persistente e cada dia perdido é contabilizado apenas uma vez.
 

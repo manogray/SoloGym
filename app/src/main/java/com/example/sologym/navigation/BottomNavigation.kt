@@ -1,8 +1,8 @@
 package com.example.sologym.navigation
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Analytics
-import androidx.compose.material.icons.outlined.Analytics
+import androidx.compose.material.icons.filled.PersonPin
+import androidx.compose.material.icons.outlined.PersonPin
 import androidx.compose.material.icons.filled.Assignment
 import androidx.compose.material.icons.outlined.Assignment
 import androidx.compose.material.icons.filled.NewReleases
@@ -43,9 +43,9 @@ sealed class BottomNavItem(
         Screen.Exercises.route
     )
     object Statistics : BottomNavItem(
-        "ESTATÍSTICAS",
-        Icons.Default.Analytics,
-        Icons.Outlined.Analytics,
+        "JOGADOR",
+        Icons.Default.PersonPin,
+        Icons.Outlined.PersonPin,
         Screen.Statistics.route
     )
 }

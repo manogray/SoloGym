@@ -17,6 +17,8 @@ import com.example.sologym.database.entity.Serie
 fun ExerciseCard(
     exercicio: Exercicio,
     series: List<Serie>,
+    hasSubstitutes: Boolean,
+    substitutedFor: String? = null,
     isCompleted: Boolean,
     onToggleCompleted: () -> Unit,
     onSubstitutesClick: () -> Unit
@@ -53,6 +55,12 @@ fun ExerciseCard(
                     text = "DESCANSO: ${exercicio.descansoSegundos}s",
                     style = MaterialTheme.typography.bodySmall
                 )
+                if (substitutedFor != null) {
+                    Text(
+                        text = "NO LUGAR DE $substitutedFor",
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                }
                 series.sortedBy { it.ordem }.forEach { serie ->
                     Text(
                         text = "SÉRIE ${serie.ordem}: ${serie.repeticoes} REPS • ${serie.carga.formatCarga()} KG",
@@ -62,8 +70,10 @@ fun ExerciseCard(
             }
             
             Row(verticalAlignment = Alignment.CenterVertically) {
-                TextButton(onClick = onSubstitutesClick) {
-                    Text("SUBSTITUIÇÕES", color = FullWhite, textDecoration = TextDecoration.Underline)
+                if (hasSubstitutes) {
+                    TextButton(onClick = onSubstitutesClick) {
+                        Text("SUBSTITUIÇÕES", color = FullWhite, textDecoration = TextDecoration.Underline)
+                    }
                 }
                 Checkbox(
                     checked = isCompleted,

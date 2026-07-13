@@ -538,11 +538,18 @@ Cada exercício poderá possuir uma lista de substitutos.
 
 Durante o treino haverá um botão "Substituições".
 
+O botão deverá ser exibido apenas quando o exercício possuir substitutos cadastrados. Ao tocar, deverá abrir um modal com as alternativas disponíveis e uma opção para retornar ao exercício original.
+
 Ao selecionar um exercício substituto:
 
 * nenhuma alteração permanente será feita no treino;
+* o card deverá exibir nome, séries, repetições, cargas e descanso do substituto;
+* a interface deverá indicar qual exercício original está sendo substituído;
+* a conclusão deverá continuar vinculada ao identificador do exercício original;
 * será considerado apenas que aquele exercício foi realizado;
 * o histórico não armazenará qual substituto foi utilizado.
+
+A seleção deverá existir apenas durante a sessão atual e ser limpa ao finalizar o treino. Caso o processo seja encerrado, não será necessário restaurar o substituto selecionado.
 
 ---
 
@@ -555,7 +562,12 @@ Ao finalizar:
 * registrar a data;
 * criar um registro no histórico;
 * limpar o progresso atual;
-* retornar o treino ao estado "Não iniciado".
+* marcar o treino como concluído para a data atual;
+* impedir uma nova conclusão e uma nova recompensa no mesmo dia.
+
+A conclusão diária deverá ser determinada pelo histórico do treino na data atual, e não por um status permanente da programação semanal.
+
+O registro no histórico e a atualização de XP/streak do Player deverão ocorrer na mesma transação. Se o treino já estiver concluído naquela data, nenhuma nova recompensa deverá ser concedida.
 
 ---
 
@@ -1355,9 +1367,13 @@ Após iniciar o treino deverá mostrar:
 00:00:00
 ```
 
-Atualização:
+Atualização visual:
 
 Uma vez por segundo.
+
+A duração deverá ser calculada pela diferença entre o instante monotônico de início e o instante atual, e não pela quantidade de atualizações executadas. O bloqueio da tela, a suspensão temporária do processo ou o uso do aplicativo em segundo plano não deverão reduzir o tempo contabilizado.
+
+Ao finalizar, a duração deverá ser recalculada diretamente pelo relógio monotônico antes de ser gravada no histórico.
 
 ---
 
@@ -1792,7 +1808,30 @@ Representa o único usuário local e sua progressão de gamificação.
 
 ---
 
-# 10.8 Enum: WorkoutStatus
+# 10.8 Entidade: ActiveWorkoutSession
+
+Representa a única sessão de treino atualmente em andamento.
+
+## Atributos
+
+| Campo                | Tipo | Descrição                                      |
+| -------------------- | ---- | ---------------------------------------------- |
+| id                   | Int  | Identificador fixo igual a 1                   |
+| workoutId            | Long | Treino que está sendo executado                |
+| startedAtEpochMillis | Long | Instante de início persistido em epoch millis  |
+
+## Regras
+
+* Deverá existir no máximo uma sessão ativa.
+* A sessão deverá ser criada antes de iniciar a contagem visual.
+* A sessão deverá sobreviver ao encerramento do processo e à reinicialização do aparelho.
+* Ao restaurar, a duração deverá considerar todo o tempo transcorrido desde `startedAtEpochMillis`.
+* A sessão deverá ser removida na mesma transação que grava o histórico e atualiza o Player.
+* Uma sessão ativa iniciada em um dia programado impede que esse dia seja contabilizado como falha enquanto o treino não for finalizado.
+
+---
+
+# 10.9 Enum: WorkoutStatus
 
 Representa o estado atual do treino.
 
@@ -2578,9 +2617,9 @@ Isso evita que eventos sejam disparados novamente após mudanças de configuraç
 
 ## Observação arquitetural importante
 
-O progresso de um treino (exercícios marcados como concluídos e cronômetro em execução) **não faz parte do modelo persistente do banco de dados**.
+Os exercícios marcados como concluídos permanecem apenas na `HomeViewModel`. Entretanto, a identificação do treino ativo e seu instante de início fazem parte do modelo persistente por meio de `ActiveWorkoutSession`.
 
-Essas informações representam apenas o estado da sessão atual do usuário e deverão ser mantidas na `HomeViewModel`.
+O valor visual do cronômetro deverá ser calculado na `HomeViewModel`, mas os dados mínimos para reconstruí-lo deverão permanecer no Room até a finalização.
 
 Ao finalizar o treino, apenas um registro será criado na entidade `HistoricoTreino`.
 
@@ -3980,12 +4019,11 @@ Não adicionar funcionalidades como:
 
 Não persistir no banco:
 
-* cronômetro;
 * exercícios marcados como concluídos;
 * diálogos;
 * estados temporários da interface.
 
-Esses elementos pertencem exclusivamente à sessão atual do usuário.
+O valor atualizado do cronômetro não deverá ser gravado a cada segundo. Somente o treino ativo e seu instante de início deverão ser persistidos em `ActiveWorkoutSession`, permitindo reconstruir a duração após encerramento do processo ou reinicialização do aparelho.
 
 ---
 
