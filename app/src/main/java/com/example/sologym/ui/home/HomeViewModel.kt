@@ -36,6 +36,7 @@ class HomeViewModel @Inject constructor(
     private var timerJob: Job? = null
     private var workoutStartedAtMillis: Long? = null
     private var restoredStartedAtEpochMillis: Long? = null
+    private val selectedVoluntaryWorkoutId = MutableStateFlow<Long?>(null)
 
     init {
         viewModelScope.launch {
@@ -50,25 +51,57 @@ class HomeViewModel @Inject constructor(
         _uiState.update { it.copy(isLoading = true) }
         
         viewModelScope.launch {
-            workoutSessionRepository.observeActiveSession()
-                .flatMapLatest { session ->
+            combine(
+                workoutSessionRepository.observeActiveSession(),
+                workoutRepository.getCompleteWorkoutByDay(today.dayOfWeek),
+                workoutRepository.getAllCompleteWorkouts(),
+                selectedVoluntaryWorkoutId
+            ) { session, scheduledWorkout, workouts, selectedWorkoutId ->
+                HomeWorkoutSource(
+                    activeSession = session,
+                    scheduledWorkout = scheduledWorkout,
+                    workouts = workouts,
+                    selectedWorkoutId = selectedWorkoutId
+                )
+            }.flatMapLatest { source ->
+                    val session = source.activeSession
+                    val isRestDay = source.scheduledWorkout == null
                     if (session != null) {
                         workoutRepository.getCompleteWorkoutById(session.workoutId)
-                            .map { workout -> HomeLoadResult(workout, false, session) }
-                    } else {
-                        workoutRepository.getCompleteWorkoutByDay(today.dayOfWeek)
-                            .flatMapLatest { workout ->
-                                if (workout == null) {
-                                    flowOf(HomeLoadResult(null, false, null))
-                                } else {
-                                    historyRepository.observeWorkoutCompletedOnDate(
-                                        workout.treino.id,
-                                        today
-                                    ).map { completed ->
-                                        HomeLoadResult(workout, completed, null)
-                                    }
-                                }
+                            .map { workout ->
+                                HomeLoadResult(
+                                    workout = workout,
+                                    completedToday = false,
+                                    activeSession = session,
+                                    availableWorkouts = source.workouts,
+                                    isRestDay = isRestDay
+                                )
                             }
+                    } else {
+                        val workout = source.scheduledWorkout ?: source.workouts
+                            .firstOrNull { it.treino.id == source.selectedWorkoutId }
+                        if (workout == null) {
+                            flowOf(
+                                HomeLoadResult(
+                                    workout = null,
+                                    completedToday = false,
+                                    activeSession = null,
+                                    availableWorkouts = source.workouts,
+                                    isRestDay = isRestDay
+                                )
+                            )
+                        } else {
+                            historyRepository.observeAnyWorkoutCompletedOnDate(today)
+                                .map { completed ->
+                                    HomeLoadResult(
+                                        workout = workout,
+                                        completedToday = completed,
+                                        activeSession = null,
+                                        availableWorkouts = source.workouts,
+                                        isRestDay = isRestDay
+                                    )
+                                }
+                        }
                     }
                 }
                 .onEach { result ->
@@ -83,6 +116,8 @@ class HomeViewModel @Inject constructor(
                         it.copy(
                             isLoading = false,
                             todayWorkout = result.workout,
+                            availableWorkouts = result.availableWorkouts,
+                            isRestDay = result.isRestDay,
                             isCompletedToday = result.completedToday,
                             isWorkoutRunning = result.activeSession != null,
                             isStarting = false
@@ -94,6 +129,22 @@ class HomeViewModel @Inject constructor(
                 }
                 .collect()
         }
+    }
+
+    fun showWorkoutPicker() {
+        val state = _uiState.value
+        if (!state.isRestDay || state.isWorkoutRunning || state.availableWorkouts.isEmpty()) return
+        _uiState.update { it.copy(showWorkoutPicker = true) }
+    }
+
+    fun dismissWorkoutPicker() {
+        _uiState.update { it.copy(showWorkoutPicker = false) }
+    }
+
+    fun selectVoluntaryWorkout(workoutId: Long) {
+        if (_uiState.value.availableWorkouts.none { it.treino.id == workoutId }) return
+        _uiState.update { it.copy(showWorkoutPicker = false) }
+        selectedVoluntaryWorkoutId.value = workoutId
     }
 
     fun startWorkout() {
@@ -266,5 +317,14 @@ class HomeViewModel @Inject constructor(
 private data class HomeLoadResult(
     val workout: CompleteWorkout?,
     val completedToday: Boolean,
-    val activeSession: ActiveWorkoutSession?
+    val activeSession: ActiveWorkoutSession?,
+    val availableWorkouts: List<CompleteWorkout>,
+    val isRestDay: Boolean
+)
+
+private data class HomeWorkoutSource(
+    val activeSession: ActiveWorkoutSession?,
+    val scheduledWorkout: CompleteWorkout?,
+    val workouts: List<CompleteWorkout>,
+    val selectedWorkoutId: Long?
 )

@@ -5,6 +5,7 @@ sealed class Screen(val route: String) {
     object Workouts : Screen("workouts")
     object Exercises : Screen("exercises")
     object Statistics : Screen("statistics")
+    object Information : Screen("information")
     object ExerciseForm : Screen("exercise_form?id={id}") {
         fun createRoute(id: Long? = null) = if (id != null) "exercise_form?id=$id" else "exercise_form"
     }

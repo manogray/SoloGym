@@ -26,6 +26,7 @@ import com.example.sologym.ui.theme.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExerciseScreen(
+    onOpenDrawer: () -> Unit,
     onAddExercise: () -> Unit,
     onEditExercise: (Long) -> Unit,
     viewModel: ExerciseViewModel = hiltViewModel()
@@ -55,7 +56,11 @@ fun ExerciseScreen(
 
     Scaffold(
         topBar = {
-            SoloTopBar("EXERCÍCIOS", Icons.Outlined.FitnessCenter)
+            SoloTopBar(
+                "EXERCÍCIOS",
+                Icons.Outlined.FitnessCenter,
+                onMenuClick = onOpenDrawer,
+            )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = onAddExercise) {

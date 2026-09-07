@@ -5,6 +5,7 @@ import com.example.sologym.database.SoloGymDatabase
 import com.example.sologym.database.dao.HistoryDao
 import com.example.sologym.database.dao.PlayerDao
 import com.example.sologym.database.dao.ActiveWorkoutSessionDao
+import com.example.sologym.database.dao.WorkoutDao
 import com.example.sologym.database.entity.HistoricoTreino
 import com.example.sologym.database.entity.Player
 import com.example.sologym.model.PlayerProgression
@@ -19,7 +20,8 @@ class HistoryRepository @Inject constructor(
     private val database: SoloGymDatabase,
     private val historyDao: HistoryDao,
     private val playerDao: PlayerDao,
-    private val sessionDao: ActiveWorkoutSessionDao
+    private val sessionDao: ActiveWorkoutSessionDao,
+    private val workoutDao: WorkoutDao
 ) {
     fun getAllHistory(): Flow<List<HistoricoTreino>> = historyDao.getAll()
 
@@ -36,14 +38,19 @@ class HistoryRepository @Inject constructor(
         endExclusive = date.plusDays(1).atStartOfDay()
     )
 
+    fun observeAnyWorkoutCompletedOnDate(date: LocalDate): Flow<Boolean> =
+        historyDao.observeAnyWorkoutCompletedByPeriod(
+            start = date.atStartOfDay(),
+            endExclusive = date.plusDays(1).atStartOfDay()
+        )
+
     suspend fun completeWorkout(
         workoutId: Long,
         completedAt: LocalDateTime,
         durationSeconds: Long
     ): Boolean = database.withTransaction {
         val date = completedAt.toLocalDate()
-        val alreadyCompleted = historyDao.countWorkoutByPeriodOnce(
-            workoutId = workoutId,
+        val alreadyCompleted = historyDao.countByPeriodOnce(
             start = date.atStartOfDay(),
             endExclusive = date.plusDays(1).atStartOfDay()
         ) > 0
@@ -66,7 +73,16 @@ class HistoryRepository @Inject constructor(
             playerDao.insert(Player(proximaDataFalha = date))
             player = playerDao.getPlayer() ?: Player(proximaDataFalha = date)
         }
-        playerDao.update(PlayerProgression.completedWorkout(player))
+        val hasScheduledWorkout = workoutDao.existsByDayOfWeek(
+            date.dayOfWeek,
+            excludeId = 0
+        )
+        val updatedPlayer = if (hasScheduledWorkout) {
+            PlayerProgression.completedWorkout(player)
+        } else {
+            PlayerProgression.completedVoluntaryWorkout(player)
+        }
+        playerDao.update(updatedPlayer)
         sessionDao.deleteActiveSession()
         true
     }

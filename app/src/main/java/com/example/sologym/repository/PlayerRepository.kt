@@ -26,6 +26,14 @@ class PlayerRepository @Inject constructor(
 ) {
     fun observePlayer(): Flow<Player> = playerDao.observePlayer().map { it ?: Player() }
 
+    suspend fun resetProgressAndHistory(today: LocalDate = LocalDate.now()) {
+        database.withTransaction {
+            getOrCreatePlayer(today)
+            historyDao.deleteAll()
+            playerDao.update(PlayerProgression.reset(today))
+        }
+    }
+
     suspend fun evaluateMissedWorkouts(today: LocalDate = LocalDate.now()) {
         database.withTransaction {
             var player = getOrCreatePlayer(today)
@@ -45,8 +53,12 @@ class PlayerRepository @Inject constructor(
                 ) > 0
                 val hasActiveWorkoutForDate = activeSessionDate == dateToEvaluate
 
-                if (hasScheduledWorkout && !completed && !hasActiveWorkoutForDate) {
-                    player = PlayerProgression.missedWorkout(player)
+                if (!completed && !hasActiveWorkoutForDate) {
+                    player = if (hasScheduledWorkout) {
+                        PlayerProgression.missedWorkout(player)
+                    } else {
+                        PlayerProgression.completedRestDay(player)
+                    }
                 }
                 dateToEvaluate = dateToEvaluate.plusDays(1)
             }

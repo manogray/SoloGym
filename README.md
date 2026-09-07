@@ -17,21 +17,24 @@ O Solo Gym permite cadastrar exercícios personalizados, montar treinos para os 
 - Histórico local dos treinos realizados.
 - Estatísticas de frequência e duração dos treinos.
 - Perfil local de Player com level, experiência, streak e falhas de treino.
-- Gamificação: treinos concluídos concedem XP e faltas em dias programados aplicam penalidade.
+- Perfil pessoal com avatar predefinido, idade calculada e histórico de peso e altura, incluindo gráficos das seis medições mais recentes.
+- Gamificação: treinos programados concedem 30 XP e streak; treinos voluntários em dias livres concedem 20 XP; descansos concluídos concedem 15 XP; faltas em dias programados aplicam penalidade.
+- Reset do progresso do Player e do histórico, sem apagar exercícios ou treinos programados.
 - Funcionamento completo sem conexão com a internet.
 
 ## Telas principais
 
-O aplicativo está dividido em quatro áreas:
+O aplicativo está dividido em cinco áreas:
 
 1. **Hoje** — exibe e permite executar o treino do dia.
 2. **Treinos** — permite montar e organizar os treinos semanais.
 3. **Exercícios** — gerencia os exercícios disponíveis.
 4. **Estatísticas** — apresenta o progresso do Player e informações calculadas a partir do histórico.
+5. **Informações** — cadastra e edita nome, data de nascimento, peso, altura e avatar predefinido do perfil local.
 
 ## Gamificação
 
-O aplicativo mantém um único Player local. Ele começa no level 1, com `0 / 100 XP`. Cada treino concluído concede 20 XP e aumenta o streak em um. Ao atingir a experiência máxima, o level aumenta, a experiência atual volta a zero e a próxima meta cresce 20%.
+O aplicativo mantém um único Player local. Ele começa no level 1, com `0 / 100 XP`. Cada treino programado concluído concede 30 XP e aumenta o streak em um. Em dias sem treino programado, o usuário pode escolher e realizar um dos treinos cadastrados voluntariamente, recebendo 20 XP sem alterar o streak. Se nenhum treino for realizado no dia livre, o descanso concede 15 XP após o término do dia, também sem alterar o streak. Ao atingir a experiência máxima, o level aumenta, a experiência atual volta a zero e a próxima meta cresce 20%.
 
 Cada treino programado pode ser concluído apenas uma vez por dia. A aba Hoje consulta o histórico da data e passa a exibir a missão como concluída, enquanto o histórico e a recompensa do Player são salvos juntos para evitar XP duplicada.
 

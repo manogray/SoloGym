@@ -7,6 +7,9 @@ import com.example.sologym.database.entity.Exercicio
 data class HomeUiState(
     val isLoading: Boolean = false,
     val todayWorkout: CompleteWorkout? = null,
+    val availableWorkouts: List<CompleteWorkout> = emptyList(),
+    val isRestDay: Boolean = false,
+    val showWorkoutPicker: Boolean = false,
     val isCompletedToday: Boolean = false,
     val isWorkoutRunning: Boolean = false,
     val isStarting: Boolean = false,

@@ -17,13 +17,44 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.sologym.ui.components.ExerciseCard
 import com.example.sologym.ui.components.SoloTopBar
 import com.example.sologym.ui.components.TimerCard
+import java.time.format.TextStyle
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
+    onOpenDrawer: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    if (uiState.showWorkoutPicker) {
+        ModalBottomSheet(onDismissRequest = viewModel::dismissWorkoutPicker) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
+                    .padding(bottom = 24.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text("ESCOLHA UM TREINO", style = MaterialTheme.typography.titleLarge)
+                Text("O TREINO VOLUNTÁRIO CONCEDE 20 XP E NÃO ALTERA O STREAK.")
+                uiState.availableWorkouts.forEach { workout ->
+                    OutlinedButton(
+                        onClick = { viewModel.selectVoluntaryWorkout(workout.treino.id) },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            workout.treino.diaSemana.getDisplayName(
+                                TextStyle.FULL,
+                                Locale.getDefault()
+                            ).uppercase()
+                        )
+                    }
+                }
+            }
+        }
+    }
 
     uiState.substitutePicker?.let { picker ->
         ModalBottomSheet(onDismissRequest = viewModel::dismissSubstitutes) {
@@ -91,6 +122,7 @@ fun HomeScreen(
             SoloTopBar(
                 "MISSÃO DIÁRIA",
                 Icons.Outlined.NewReleases,
+                onMenuClick = onOpenDrawer,
             )
         }
     ) { padding ->
@@ -106,10 +138,29 @@ fun HomeScreen(
                 }
             } else if (uiState.todayWorkout == null) {
                 Box(modifier = Modifier.fillMaxSize()) {
-                    Text(
-                        text = "HOJE É O DESCANSO DOS JUSTOS",
-                        modifier = Modifier.align(Alignment.Center)
-                    )
+                    Column(
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Text(
+                            text = "HOJE É O DESCANSO DOS JUSTOS",
+                            style = MaterialTheme.typography.titleLarge
+                        )
+                        Text("DESCANSAR O DIA TODO CONCEDE 15 XP.")
+                        if (uiState.availableWorkouts.isEmpty()) {
+                            Text("CADASTRE UM TREINO PARA TREINAR VOLUNTARIAMENTE.")
+                        } else {
+                            Button(
+                                onClick = viewModel::showWorkoutPicker,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text("ESCOLHER UM TREINO")
+                            }
+                        }
+                    }
                 }
             } else if (uiState.isCompletedToday) {
                 Box(modifier = Modifier.fillMaxSize()) {
@@ -126,6 +177,18 @@ fun HomeScreen(
                     }
                 }
             } else {
+                if (uiState.isRestDay && !uiState.isWorkoutRunning) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("TREINO VOLUNTÁRIO • 20 XP")
+                        TextButton(onClick = viewModel::showWorkoutPicker) {
+                            Text("TROCAR")
+                        }
+                    }
+                }
                 if (uiState.isWorkoutRunning) {
                     TimerCard(elapsedSeconds = uiState.elapsedTime)
                 }
@@ -169,7 +232,7 @@ fun HomeScreen(
                         onClick = { viewModel.startWorkout() },
                         modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp)
                     ) {
-                        Text("INICIAR MISSÃO")
+                        Text(if (uiState.isRestDay) "INICIAR TREINO VOLUNTÁRIO" else "INICIAR MISSÃO")
                     }
                 } else {
                     Button(

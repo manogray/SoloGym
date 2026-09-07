@@ -10,12 +10,14 @@ import com.example.sologym.ui.exercises.ExerciseFormScreen
 import com.example.sologym.ui.exercises.ExerciseScreen
 import com.example.sologym.ui.home.HomeScreen
 import com.example.sologym.ui.statistics.StatisticsScreen
+import com.example.sologym.ui.information.InformationScreen
 import com.example.sologym.ui.workouts.WorkoutFormScreen
 import com.example.sologym.ui.workouts.WorkoutScreen
 
 @Composable
 fun SoloGymNavHost(
     navController: NavHostController,
+    onOpenDrawer: () -> Unit,
     modifier: Modifier = Modifier
 ) {
 
@@ -25,10 +27,11 @@ fun SoloGymNavHost(
         modifier = modifier
     ) {
         composable(Screen.Home.route) {
-            HomeScreen()
+            HomeScreen(onOpenDrawer = onOpenDrawer)
         }
         composable(Screen.Workouts.route) {
             WorkoutScreen(
+                onOpenDrawer = onOpenDrawer,
                 onAddWorkout = { navController.navigate(Screen.WorkoutForm.createRoute()) },
                 onEditWorkout = { id -> navController.navigate(Screen.WorkoutForm.createRoute(id)) }
             )
@@ -43,6 +46,7 @@ fun SoloGymNavHost(
         }
         composable(Screen.Exercises.route) {
             ExerciseScreen(
+                onOpenDrawer = onOpenDrawer,
                 onAddExercise = { navController.navigate(Screen.ExerciseForm.createRoute()) },
                 onEditExercise = { id -> navController.navigate(Screen.ExerciseForm.createRoute(id)) }
             )
@@ -56,7 +60,10 @@ fun SoloGymNavHost(
             )
         }
         composable(Screen.Statistics.route) {
-            StatisticsScreen()
+            StatisticsScreen(onOpenDrawer = onOpenDrawer)
+        }
+        composable(Screen.Information.route) {
+            InformationScreen(onOpenDrawer = onOpenDrawer)
         }
     }
 }

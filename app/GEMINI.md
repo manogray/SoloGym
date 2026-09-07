@@ -212,7 +212,7 @@ Exemplos:
 
 O usuário nunca deve ficar em dúvida sobre onde encontrar determinada funcionalidade.
 
-As principais funcionalidades deverão estar organizadas em abas.
+As principais funcionalidades deverão estar organizadas em um menu lateral recolhido.
 
 ---
 
@@ -274,7 +274,7 @@ As funcionalidades abaixo **não devem ser implementadas nesta versão**, porém
 
 ## 3.1 O que faz parte do projeto
 
-A versão inicial do Solo Gym deverá possuir quatro áreas principais.
+A versão inicial do Solo Gym deverá possuir cinco áreas principais.
 
 ### 1. Tela Inicial
 
@@ -347,6 +347,18 @@ Exemplos:
 * lista dos últimos treinos realizados.
 
 Nenhuma informação estatística dependerá de internet.
+
+### 5. Informações
+
+Permite cadastrar e editar localmente:
+
+* nome;
+* data de nascimento;
+* peso atual em quilogramas;
+* altura atual em centímetros;
+* avatar escolhido entre as imagens predefinidas do aplicativo.
+
+Esses dados deverão ser exibidos na tela Jogador. A data de nascimento não deverá ser exibida diretamente nessa tela; deverá ser utilizada para calcular a idade conforme a data atual.
 
 ---
 
@@ -623,14 +635,15 @@ Todos os dados deverão permanecer salvos após:
 
 ## RF-15 — Navegação
 
-O aplicativo deverá possuir navegação por abas.
+O aplicativo deverá possuir navegação por menu lateral recolhido, aberto por um botão no topo ou por gesto a partir da borda esquerda.
 
-As abas serão:
+As opções do menu serão:
 
 1. Hoje
 2. Treinos
 3. Exercícios
 4. Estatísticas
+5. Informações
 
 ---
 
@@ -646,7 +659,9 @@ O Player deverá possuir:
 * streak de treinos, inicialmente 0;
 * falhas de treino, inicialmente 0.
 
-Cada treino finalizado deverá conceder 20 pontos de experiência e incrementar o streak em 1.
+Cada treino programado finalizado deverá conceder 30 pontos de experiência e incrementar o streak em 1.
+
+Em um dia sem treino programado, a aba Hoje deverá permitir selecionar e executar qualquer treino cadastrado. Essa conclusão voluntária deverá conceder 20 pontos de experiência sem alterar o streak. Caso nenhum treino seja concluído no dia livre, o descanso deverá conceder 15 pontos de experiência após o término do dia, também sem alterar o streak. Apenas uma dessas recompensas poderá ser concedida por data.
 
 Ao atingir a experiência máxima:
 
@@ -670,6 +685,20 @@ Se o Player estiver acima do level 1 e possuir menos de 10 pontos de experiênci
 O level nunca poderá ser menor que 1. Falhas sucessivas poderão reduzir o Player até level 1 com experiência atual igual a zero.
 
 Cada data deverá ser avaliada apenas uma vez. A primeira inicialização do Player não deverá aplicar penalidades retroativas aos dias anteriores à instalação da funcionalidade.
+
+A aba Jogador deverá oferecer uma ação **Reset** com confirmação. Essa ação deverá, na mesma transação:
+
+* restaurar level, experiência, streak e falhas aos valores iniciais;
+* apagar todo o histórico de treinos concluídos;
+* preservar exercícios e treinos programados;
+* permitir novamente a realização do treino do dia, caso sua conclusão tenha sido apagada;
+* reiniciar a avaliação de falhas a partir da data atual, sem aplicar penalidades retroativas.
+
+---
+
+## RF-17 — Informações pessoais
+
+O aplicativo deverá manter um único perfil pessoal local, separado da progressão do Player. A tela Informações deverá cadastrar e editar nome, data de nascimento e avatar predefinido. O perfil deverá iniciar com `default-profile.jpg` e permitir a escolha somente das imagens empacotadas que terminem em `-profile.png`. Não deverá existir seleção de fotos do armazenamento do aparelho. Peso e altura deverão ser registrados como medições históricas: a primeira medição define os valores iniciais e as seguintes criam novos registros sem sobrescrever os anteriores. A tela Jogador deverá exibir avatar, nome, peso e altura mais recentes, a idade calculada a partir da data atual e gráficos com as seis últimas medições de peso e altura. A idade não deverá ser persistida.
 
 ---
 
@@ -942,7 +971,7 @@ com.sologym
 │
 ├── navigation/
 │   ├── Navigation.kt
-│   ├── BottomNavigation.kt
+│   ├── NavigationDrawer.kt
 │   ├── Destinations.kt
 │   └── Routes.kt
 │
@@ -1080,9 +1109,9 @@ Evitar componentes muito específicos fora de suas respectivas features.
 
 # 8. Fluxo de Navegação
 
-O aplicativo utilizará uma navegação simples baseada em Bottom Navigation.
+O aplicativo utilizará uma navegação simples baseada em um Navigation Drawer lateral esquerdo.
 
-As quatro abas principais serão:
+As cinco opções principais serão:
 
 ```text
 Hoje
@@ -1098,6 +1127,8 @@ Exercícios
 ↓
 
 Estatísticas
+
+Informações
 ```
 
 A aba **Hoje** será sempre a tela inicial do aplicativo.
@@ -1115,12 +1146,13 @@ Tela Principal
 
 ↓
 
-Bottom Navigation
+Navigation Drawer
 
 ├── Hoje
 ├── Treinos
 ├── Exercícios
-└── Estatísticas
+├── Estatísticas
+└── Informações
 ```
 
 ---
@@ -1831,7 +1863,48 @@ Representa a única sessão de treino atualmente em andamento.
 
 ---
 
-# 10.9 Enum: WorkoutStatus
+# 10.9 Entidade: PlayerProfile
+
+Representa as informações pessoais do único perfil local.
+
+| Campo          | Tipo       | Descrição                                      |
+| -------------- | ---------- | ---------------------------------------------- |
+| id             | Int        | Identificador fixo igual a 1                   |
+| nome           | String     | Nome da pessoa                                 |
+| dataNascimento | LocalDate? | Data utilizada para calcular a idade           |
+| fotoUri        | String     | Identificador do avatar predefinido             |
+
+## Regras
+
+* Deverá existir somente um perfil local.
+* O avatar padrão deverá ser `default-profile.jpg`.
+* Somente imagens empacotadas cujo arquivo termine em `-profile.png` poderão ser escolhidas.
+* O aplicativo não deverá solicitar uma foto do armazenamento do usuário.
+* A idade deverá ser calculada dinamicamente e nunca persistida.
+* Os dados pessoais deverão permanecer separados da progressão do Player.
+
+---
+
+# 10.10 Entidade: BodyMeasurement
+
+Representa uma entrada imutável no histórico de medidas corporais.
+
+| Campo      | Tipo          | Descrição                         |
+| ---------- | ------------- | --------------------------------- |
+| id         | Long          | Identificador gerado pelo Room    |
+| recordedAt | LocalDateTime | Data e hora do registro           |
+| pesoKg     | Double        | Peso registrado em quilogramas    |
+| alturaCm   | Double        | Altura registrada em centímetros  |
+
+## Regras
+
+* Novas medições nunca deverão sobrescrever medições anteriores.
+* A medição mais recente define o peso e a altura atuais.
+* A tela Jogador deverá apresentar até as seis medições mais recentes em ordem cronológica nos gráficos.
+
+---
+
+# 10.11 Enum: WorkoutStatus
 
 Representa o estado atual do treino.
 
@@ -1951,6 +2024,14 @@ TreinoExercicio
 ExercicioSubstituto
 
 HistoricoTreino
+
+Player
+
+ActiveWorkoutSession
+
+PlayerProfile
+
+BodyMeasurement
 ```
 
 ---
@@ -3174,7 +3255,7 @@ Uma mesma data não poderá gerar mais de uma falha, mesmo após fechar ou reini
 
 ### RN-25
 
-Concluir um treino concede 20 XP e incrementa o streak. Uma falha desconta 10 XP, incrementa o contador de falhas e zera o streak. Se esse desconto tornaria a XP negativa e o Player estiver acima do level 1, ele deverá perder um level e ter sua experiência máxima reduzida em 20%.
+Concluir um treino programado concede 30 XP e incrementa o streak. Concluir um treino voluntário em um dia livre concede 20 XP sem alterar o streak; concluir o descanso desse dia concede 15 XP sem alterar o streak. Uma falha desconta 10 XP, incrementa o contador de falhas e zera o streak. Se esse desconto tornaria a XP negativa e o Player estiver acima do level 1, ele deverá perder um level e ter sua experiência máxima reduzida em 20%.
 
 ---
 
@@ -3672,7 +3753,7 @@ A implementação será considerada concluída quando todos os critérios abaixo
 ## Interface
 
 * Material Design 3 aplicado.
-* Bottom Navigation funcionando.
+* Navigation Drawer funcionando.
 * Estados vazios implementados.
 * Estados de erro implementados.
 * Estados de carregamento implementados.
@@ -4170,12 +4251,13 @@ O Solo Gym é um aplicativo Android para gerenciamento de treinos de musculaçã
 * Navigation Compose
 * StateFlow
 
-O aplicativo possui quatro áreas principais:
+O aplicativo possui cinco áreas principais:
 
 * Hoje
 * Treinos
 * Exercícios
 * Estatísticas
+* Informações
 
 Seu funcionamento é totalmente offline e baseado em armazenamento local.
 

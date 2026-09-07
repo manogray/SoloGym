@@ -18,9 +18,11 @@ import com.example.sologym.database.entity.*
         ExercicioSubstituto::class,
         HistoricoTreino::class,
         Player::class,
-        ActiveWorkoutSession::class
+        ActiveWorkoutSession::class,
+        PlayerProfile::class,
+        BodyMeasurement::class
     ],
-    version = 4,
+    version = 7,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -33,6 +35,8 @@ abstract class SoloGymDatabase : RoomDatabase() {
     abstract fun historyDao(): HistoryDao
     abstract fun playerDao(): PlayerDao
     abstract fun activeWorkoutSessionDao(): ActiveWorkoutSessionDao
+    abstract fun playerProfileDao(): PlayerProfileDao
+    abstract fun bodyMeasurementDao(): BodyMeasurementDao
 
     companion object {
         val MIGRATION_1_2 = object : Migration(1, 2) {
@@ -72,6 +76,98 @@ abstract class SoloGymDatabase : RoomDatabase() {
                     )
                     """.trimIndent()
                 )
+            }
+        }
+
+        val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS player_profile (
+                        id INTEGER NOT NULL,
+                        nome TEXT NOT NULL,
+                        dataNascimento TEXT,
+                        pesoKg REAL,
+                        alturaCm REAL,
+                        fotoUri TEXT,
+                        PRIMARY KEY(id)
+                    )
+                    """.trimIndent()
+                )
+            }
+        }
+
+        val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS body_measurement (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        recordedAt TEXT NOT NULL,
+                        pesoKg REAL NOT NULL,
+                        alturaCm REAL NOT NULL
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL(
+                    """
+                    INSERT INTO body_measurement (recordedAt, pesoKg, alturaCm)
+                    SELECT strftime('%Y-%m-%dT%H:%M:%S', 'now'), pesoKg, alturaCm
+                    FROM player_profile
+                    WHERE id = 1 AND pesoKg IS NOT NULL AND alturaCm IS NOT NULL
+                    """.trimIndent()
+                )
+                db.execSQL(
+                    """
+                    CREATE TABLE player_profile_new (
+                        id INTEGER NOT NULL,
+                        nome TEXT NOT NULL,
+                        dataNascimento TEXT,
+                        fotoUri TEXT,
+                        PRIMARY KEY(id)
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL(
+                    """
+                    INSERT INTO player_profile_new (id, nome, dataNascimento, fotoUri)
+                    SELECT id, nome, dataNascimento, fotoUri FROM player_profile
+                    """.trimIndent()
+                )
+                db.execSQL("DROP TABLE player_profile")
+                db.execSQL("ALTER TABLE player_profile_new RENAME TO player_profile")
+            }
+        }
+
+        val MIGRATION_6_7 = object : Migration(6, 7) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE player_profile_new (
+                        id INTEGER NOT NULL,
+                        nome TEXT NOT NULL,
+                        dataNascimento TEXT,
+                        fotoUri TEXT NOT NULL,
+                        PRIMARY KEY(id)
+                    )
+                    """.trimIndent()
+                )
+                db.execSQL(
+                    """
+                    INSERT INTO player_profile_new (id, nome, dataNascimento, fotoUri)
+                    SELECT id, nome, dataNascimento,
+                        CASE
+                            WHEN fotoUri IN (
+                                'bellion_profile', 'beru_profile', 'igris_profile',
+                                'iron_profile', 'tank_profile', 'default_profile'
+                            ) THEN fotoUri
+                            ELSE 'default_profile'
+                        END
+                    FROM player_profile
+                    """.trimIndent()
+                )
+                db.execSQL("DROP TABLE player_profile")
+                db.execSQL("ALTER TABLE player_profile_new RENAME TO player_profile")
             }
         }
     }

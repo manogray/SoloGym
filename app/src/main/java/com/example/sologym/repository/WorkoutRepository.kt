@@ -21,6 +21,8 @@ class WorkoutRepository @Inject constructor(
 
     fun getCompleteWorkoutById(id: Long) = workoutDao.getCompleteById(id)
 
+    fun getAllCompleteWorkouts() = workoutDao.getAllComplete()
+
     fun getAllWorkouts(): Flow<List<Treino>> = workoutDao.getAll()
 
     suspend fun insertWorkout(treino: Treino, exercises: List<TreinoExercicio>) {

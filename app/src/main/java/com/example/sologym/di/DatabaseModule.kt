@@ -26,7 +26,10 @@ object DatabaseModule {
             .addMigrations(
                 SoloGymDatabase.MIGRATION_1_2,
                 SoloGymDatabase.MIGRATION_2_3,
-                SoloGymDatabase.MIGRATION_3_4
+                SoloGymDatabase.MIGRATION_3_4,
+                SoloGymDatabase.MIGRATION_4_5,
+                SoloGymDatabase.MIGRATION_5_6,
+                SoloGymDatabase.MIGRATION_6_7
             )
             .build()
     }
@@ -55,4 +58,11 @@ object DatabaseModule {
     @Provides
     fun provideActiveWorkoutSessionDao(db: SoloGymDatabase): ActiveWorkoutSessionDao =
         db.activeWorkoutSessionDao()
+
+    @Provides
+    fun providePlayerProfileDao(db: SoloGymDatabase): PlayerProfileDao = db.playerProfileDao()
+
+    @Provides
+    fun provideBodyMeasurementDao(db: SoloGymDatabase): BodyMeasurementDao =
+        db.bodyMeasurementDao()
 }

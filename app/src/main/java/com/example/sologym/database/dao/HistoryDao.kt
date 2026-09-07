@@ -13,6 +13,9 @@ interface HistoryDao {
     @Query("SELECT * FROM historico_treino ORDER BY data DESC")
     fun getAll(): Flow<List<HistoricoTreino>>
 
+    @Query("DELETE FROM historico_treino")
+    suspend fun deleteAll()
+
     @Query("SELECT * FROM historico_treino WHERE data >= :start AND data <= :end")
     fun getByPeriod(start: LocalDateTime, end: LocalDateTime): Flow<List<HistoricoTreino>>
 
@@ -34,6 +37,19 @@ interface HistoryDao {
     )
     fun observeWorkoutCompletedByPeriod(
         workoutId: Long,
+        start: LocalDateTime,
+        endExclusive: LocalDateTime
+    ): Flow<Boolean>
+
+    @Query(
+        """
+        SELECT EXISTS(
+            SELECT 1 FROM historico_treino
+            WHERE data >= :start AND data < :endExclusive
+        )
+        """
+    )
+    fun observeAnyWorkoutCompletedByPeriod(
         start: LocalDateTime,
         endExclusive: LocalDateTime
     ): Flow<Boolean>

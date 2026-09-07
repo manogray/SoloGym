@@ -31,6 +31,10 @@ interface WorkoutDao {
     @Query("SELECT * FROM treino WHERE id = :id")
     fun getCompleteById(id: Long): Flow<com.example.sologym.database.relation.CompleteWorkout?>
 
+    @Transaction
+    @Query("SELECT * FROM treino ORDER BY diaSemana")
+    fun getAllComplete(): Flow<List<com.example.sologym.database.relation.CompleteWorkout>>
+
     @Query("SELECT * FROM treino")
     fun getAll(): Flow<List<Treino>>
 

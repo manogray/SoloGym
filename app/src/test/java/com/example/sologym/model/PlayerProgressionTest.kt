@@ -1,17 +1,52 @@
 package com.example.sologym.model
 
 import com.example.sologym.database.entity.Player
+import java.time.LocalDate
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class PlayerProgressionTest {
     @Test
+    fun resetRestoresInitialProgressAndStartsFailureEvaluationToday() {
+        val today = LocalDate.of(2026, 8, 31)
+
+        val result = PlayerProgression.reset(today)
+
+        assertEquals(1, result.level)
+        assertEquals(0, result.experienciaAtual)
+        assertEquals(100, result.experienciaMaxima)
+        assertEquals(0, result.streakTreinos)
+        assertEquals(0, result.falhasTreino)
+        assertEquals(today, result.proximaDataFalha)
+    }
+
+    @Test
     fun completedWorkoutAddsExperienceAndStreak() {
         val result = PlayerProgression.completedWorkout(Player())
 
-        assertEquals(20, result.experienciaAtual)
+        assertEquals(30, result.experienciaAtual)
         assertEquals(1, result.streakTreinos)
         assertEquals(1, result.level)
+    }
+
+    @Test
+    fun voluntaryWorkoutAddsTwentyExperienceWithoutChangingStreak() {
+        val result = PlayerProgression.completedVoluntaryWorkout(
+            Player(experienciaAtual = 10, streakTreinos = 4)
+        )
+
+        assertEquals(30, result.experienciaAtual)
+        assertEquals(4, result.streakTreinos)
+    }
+
+    @Test
+    fun completedRestDayAddsFifteenExperienceWithoutChangingStreak() {
+        val result = PlayerProgression.completedRestDay(
+            Player(experienciaAtual = 10, streakTreinos = 4)
+        )
+
+        assertEquals(25, result.experienciaAtual)
+        assertEquals(4, result.streakTreinos)
     }
 
     @Test
