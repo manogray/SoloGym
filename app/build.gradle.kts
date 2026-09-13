@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.myAndroidApplication)
     alias(libs.plugins.myKotlinAndroid)
@@ -5,6 +7,15 @@ plugins {
     alias(libs.plugins.myKsp)
     alias(libs.plugins.myHilt)
 }
+
+val localProperties = Properties().apply {
+    val file = rootProject.file("local.properties")
+    if (file.exists()) file.inputStream().use(::load)
+}
+val spotifyClientId = providers.gradleProperty("SPOTIFY_CLIENT_ID")
+    .orElse(providers.environmentVariable("SPOTIFY_CLIENT_ID"))
+    .orElse(localProperties.getProperty("SPOTIFY_CLIENT_ID", ""))
+    .get()
 
 android {
     namespace = "com.example.sologym"
@@ -38,10 +49,18 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
+    }
+
+    defaultConfig {
+        buildConfigField("String", "SPOTIFY_CLIENT_ID", "\"$spotifyClientId\"")
+        buildConfigField("String", "SPOTIFY_REDIRECT_URI", "\"sologym://spotify-callback\"")
     }
 }
 
 dependencies {
+    implementation(files("libs/spotify-app-remote-release-0.8.0.aar"))
+    implementation("com.google.code.gson:gson:2.11.0")
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)

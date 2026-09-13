@@ -17,13 +17,17 @@ import androidx.navigation.compose.rememberNavController
 import com.example.sologym.navigation.DrawerNavItem
 import com.example.sologym.navigation.SoloGymNavigationDrawerContent
 import com.example.sologym.navigation.SoloGymNavHost
+import com.example.sologym.spotify.SpotifyController
 import com.example.sologym.ui.theme.SoloGymTheme
 import com.example.sologym.ui.theme.DarkBlue
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    @Inject lateinit var spotifyController: SpotifyController
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -71,5 +75,10 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onStop() {
+        spotifyController.disconnect()
+        super.onStop()
     }
 }

@@ -1,5 +1,8 @@
 package com.example.sologym.ui.information
 
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,6 +35,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -40,6 +44,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.sologym.ui.components.ProfilePhoto
 import com.example.sologym.ui.components.SoloTopBar
 import com.example.sologym.model.ProfileImages
+import com.example.sologym.spotify.SpotifyViewModel
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
@@ -50,8 +55,11 @@ import java.time.format.DateTimeFormatter
 fun InformationScreen(
     onOpenDrawer: () -> Unit,
     viewModel: InformationViewModel = hiltViewModel(),
+    spotifyViewModel: SpotifyViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val spotifyState by spotifyViewModel.uiState.collectAsStateWithLifecycle()
+    val activity = LocalContext.current.findActivity()
     var showDatePicker by remember { mutableStateOf(false) }
     var showPhotoPicker by remember { mutableStateOf(false) }
 
@@ -229,6 +237,57 @@ fun InformationScreen(
                         Text("SALVAR")
                     }
                 }
+                Text(
+                    "SPOTIFY",
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Text(
+                    "COLE O LINK DE UMA PLAYLIST PARA USÁ-LA DURANTE OS TREINOS.",
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                OutlinedTextField(
+                    value = spotifyState.playlistInput,
+                    onValueChange = spotifyViewModel::updatePlaylistInput,
+                    label = { Text("LINK OU URI DA PLAYLIST") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                OutlinedButton(
+                    onClick = spotifyViewModel::savePlaylist,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text("SALVAR PLAYLIST")
+                }
+                Button(
+                    onClick = {
+                        if (spotifyState.isConnected) {
+                            spotifyViewModel.disconnect()
+                        } else {
+                            activity?.let(spotifyViewModel::connect)
+                        }
+                    },
+                    enabled = spotifyState.isConfigured &&
+                        !spotifyState.isConnecting &&
+                        activity != null,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(
+                        when {
+                            spotifyState.isConnected -> "DESCONECTAR SPOTIFY"
+                            spotifyState.isConnecting -> "CONECTANDO..."
+                            else -> "CONECTAR SPOTIFY"
+                        }
+                    )
+                }
+                if (!spotifyState.isConfigured) {
+                    Text(
+                        "CONFIGURE SPOTIFY_CLIENT_ID E GERE O APK NOVAMENTE.",
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
+                spotifyState.message?.let { message -> Text(message) }
             }
         }
     }
@@ -236,3 +295,9 @@ fun InformationScreen(
 
 private fun formatMeasurement(value: Double): String =
     if (value % 1.0 == 0.0) value.toInt().toString() else value.toString()
+
+private tailrec fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
+}

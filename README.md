@@ -20,6 +20,7 @@ O Solo Gym permite cadastrar exercícios personalizados, montar treinos para os 
 - Perfil pessoal com avatar predefinido, idade calculada e histórico de peso e altura, incluindo gráficos das seis medições mais recentes.
 - Gamificação: treinos programados concedem 30 XP e streak; treinos voluntários em dias livres concedem 20 XP; descansos concluídos concedem 15 XP; faltas em dias programados aplicam penalidade.
 - Reset do progresso do Player e do histórico, sem apagar exercícios ou treinos programados.
+- Integração opcional com o aplicativo Spotify para reproduzir uma playlist e controlar a música durante o treino.
 - Funcionamento completo sem conexão com a internet.
 
 ## Telas principais
@@ -74,6 +75,24 @@ O Android Studio pode ser usado para instalar e gerenciar o SDK, mas não é obr
 ## Executando o projeto
 
 Clone o repositório e abra um terminal na pasta raiz do projeto.
+
+### Configuração opcional do Spotify
+
+Crie um aplicativo no [Spotify Developer Dashboard](https://developer.spotify.com/dashboard), selecione Android e cadastre:
+
+- Package name: `com.example.sologym`
+- Redirect URI: `sologym://spotify-callback`
+- Fingerprint SHA-1 da chave usada para assinar o APK
+
+Depois, adicione o Client ID ao arquivo local e não versionado `local.properties`:
+
+```properties
+SPOTIFY_CLIENT_ID=seu_client_id
+```
+
+Também é possível usar a variável de ambiente `SPOTIFY_CLIENT_ID` ou o argumento Gradle `-PSPOTIFY_CLIENT_ID=...`. Sem essa configuração, o restante do aplicativo compila e funciona normalmente, mas a conexão com o Spotify permanece desabilitada.
+
+O projeto inclui o Spotify App Remote SDK `0.8.0` em `app/libs`. Seu SHA-256 é `b5a6dd880eaf01f63a871cba9ef7af77c341f8a94ffc8fdf2e9021f9a9d4c198`.
 
 No Windows, compile o APK de desenvolvimento com:
 
@@ -137,7 +156,7 @@ A especificação técnica completa, incluindo requisitos funcionais, regras de 
 
 ## Escopo
 
-O Solo Gym prioriza uma experiência local e objetiva. A versão atual não inclui contas de usuário, serviços remotos, sincronização em nuvem, recursos sociais, controle de dieta ou geração automática de treinos.
+O Solo Gym prioriza uma experiência local e objetiva. A integração com o Spotify é opcional e não interfere nas funcionalidades offline; a versão atual não inclui contas próprias, sincronização em nuvem, recursos sociais, controle de dieta ou geração automática de treinos.
 
 ## Status
 

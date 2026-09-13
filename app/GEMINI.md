@@ -23,7 +23,7 @@ O aplicativo deve permitir que o usuário:
 * Consultar estatísticas simples sobre frequência de treinos.
 * Acompanhar level, experiência, streak e falhas por meio de um Player local.
 
-Todo o processamento deve ocorrer localmente no dispositivo do usuário, sem qualquer dependência de serviços externos.
+Todo o processamento principal deve ocorrer localmente no dispositivo do usuário. A integração opcional com o Spotify é a única exceção e não poderá impedir o funcionamento offline dos treinos.
 
 O aplicativo foi concebido para ser extremamente simples de utilizar, rápido e focado na experiência de treino. Não haverá funcionalidades relacionadas a redes sociais, sincronização em nuvem, autenticação de usuários ou compartilhamento de dados.
 
@@ -377,7 +377,7 @@ As funcionalidades abaixo estão explicitamente fora do escopo.
 * Integração com smartwatches
 * Integração com Google Fit
 * Sincronização entre dispositivos
-* Streaming
+* Streaming implementado diretamente pelo Solo Gym
 * IA para geração de treinos
 * Sugestões automáticas de exercícios
 * Controle de dieta
@@ -704,6 +704,14 @@ O aplicativo deverá manter um único perfil pessoal local, separado da progress
 
 ---
 
+## RF-18 — Integração opcional com Spotify
+
+A tela Informações deverá permitir salvar o link ou URI de uma playlist e autorizar o controle do aplicativo oficial do Spotify por meio do Spotify App Remote. Quando houver playlist configurada, a tela Hoje deverá exibir um player compacto com música e artista atuais, reprodução da playlist, pausa, retomada e troca de faixa. Ao iniciar um treino com o Spotify já conectado, a playlist configurada deverá começar automaticamente.
+
+O Client ID deverá ser fornecido no momento do build e nunca armazenado diretamente no código-fonte. A integração deverá permanecer desabilitada quando ele não estiver configurado. A ausência do aplicativo Spotify, de autorização ou de conexão não deverá impedir a criação ou execução de treinos nem qualquer funcionalidade de gamificação.
+
+---
+
 # 5. Requisitos Não Funcionais
 
 Os requisitos desta seção definem padrões de qualidade da aplicação.
@@ -804,6 +812,8 @@ O usuário não deverá perceber atrasos ao:
 ## RNF-11 — Offline
 
 O aplicativo deverá funcionar integralmente sem conexão com a internet.
+
+A integração opcional com o Spotify poderá depender do aplicativo oficial e da conectividade exigida pelo próprio serviço. Sua indisponibilidade não deverá afetar nenhuma funcionalidade principal.
 
 ---
 
@@ -3767,6 +3777,7 @@ A implementação será considerada concluída quando todos os critérios abaixo
 ## Offline
 
 * Todo o aplicativo funciona sem internet.
+* A integração opcional com Spotify pode ficar indisponível sem afetar os treinos e dados locais.
 
 ---
 

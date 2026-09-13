@@ -1,5 +1,8 @@
 package com.example.sologym.ui.home
 
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -10,12 +13,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.sologym.ui.components.ExerciseCard
 import com.example.sologym.ui.components.SoloTopBar
+import com.example.sologym.ui.components.SpotifyPlayerCard
 import com.example.sologym.ui.components.TimerCard
+import com.example.sologym.spotify.SpotifyViewModel
 import java.time.format.TextStyle
 import java.util.Locale
 
@@ -23,9 +29,12 @@ import java.util.Locale
 @Composable
 fun HomeScreen(
     onOpenDrawer: () -> Unit,
-    viewModel: HomeViewModel = hiltViewModel()
+    viewModel: HomeViewModel = hiltViewModel(),
+    spotifyViewModel: SpotifyViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val spotifyState by spotifyViewModel.uiState.collectAsStateWithLifecycle()
+    val activity = LocalContext.current.findActivity()
 
     if (uiState.showWorkoutPicker) {
         ModalBottomSheet(onDismissRequest = viewModel::dismissWorkoutPicker) {
@@ -130,6 +139,17 @@ fun HomeScreen(
                 .padding(padding)
                 .padding(horizontal = 16.dp)
         ) {
+            if (spotifyState.playlistUri != null) {
+                SpotifyPlayerCard(
+                    state = spotifyState,
+                    onConnect = { activity?.let(spotifyViewModel::connect) },
+                    onPlayPlaylist = spotifyViewModel::playPlaylist,
+                    onTogglePlayback = spotifyViewModel::togglePlayback,
+                    onPrevious = spotifyViewModel::skipPrevious,
+                    onNext = spotifyViewModel::skipNext,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
+            }
             if (uiState.isLoading) {
                 Box(modifier = Modifier.fillMaxSize()) {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
@@ -227,7 +247,12 @@ fun HomeScreen(
                     }
                 } else if (!uiState.isWorkoutRunning) {
                     Button(
-                        onClick = { viewModel.startWorkout() },
+                        onClick = {
+                            viewModel.startWorkout()
+                            if (spotifyState.isConnected && spotifyState.playlistUri != null) {
+                                spotifyViewModel.playPlaylist()
+                            }
+                        },
                         modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp)
                     ) {
                         Text(if (uiState.isRestDay) "INICIAR TREINO VOLUNTÁRIO" else "INICIAR MISSÃO")
@@ -246,4 +271,10 @@ fun HomeScreen(
             }
         }
     }
+}
+
+private tailrec fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
 }
