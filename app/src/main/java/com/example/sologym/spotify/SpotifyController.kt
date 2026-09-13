@@ -2,12 +2,16 @@ package com.example.sologym.spotify
 
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import com.example.sologym.BuildConfig
 import com.spotify.android.appremote.api.ConnectionParams
 import com.spotify.android.appremote.api.Connector
 import com.spotify.android.appremote.api.SpotifyAppRemote
 import com.spotify.protocol.client.Subscription
 import com.spotify.protocol.types.PlayerState
+import com.spotify.sdk.android.auth.AuthorizationClient
+import com.spotify.sdk.android.auth.AuthorizationRequest
+import com.spotify.sdk.android.auth.AuthorizationResponse
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -66,9 +70,38 @@ class SpotifyController @Inject constructor(
         if (appRemote?.isConnected == true || _uiState.value.isConnecting) return
 
         _uiState.update { it.copy(isConnecting = true, message = null) }
+        val request = AuthorizationRequest.Builder(
+            BuildConfig.SPOTIFY_CLIENT_ID,
+            AuthorizationResponse.Type.CODE,
+            BuildConfig.SPOTIFY_REDIRECT_URI,
+        )
+            .setScopes(arrayOf(APP_REMOTE_CONTROL_SCOPE))
+            .setShowDialog(true)
+            .build()
+        AuthorizationClient.openLoginActivity(activity, AUTH_REQUEST_CODE, request)
+    }
+
+    fun handleAuthorizationResult(activity: Activity, resultCode: Int, data: Intent?) {
+        val response = AuthorizationClient.getResponse(resultCode, data)
+        when (response.type) {
+            AuthorizationResponse.Type.CODE,
+            AuthorizationResponse.Type.TOKEN -> connectRemote(activity)
+            AuthorizationResponse.Type.ERROR -> _uiState.update {
+                it.copy(
+                    isConnecting = false,
+                    message = response.error ?: "O Spotify recusou a autorização.",
+                )
+            }
+            else -> _uiState.update {
+                it.copy(isConnecting = false, message = "Autorização do Spotify cancelada.")
+            }
+        }
+    }
+
+    private fun connectRemote(activity: Activity) {
         val params = ConnectionParams.Builder(BuildConfig.SPOTIFY_CLIENT_ID)
             .setRedirectUri(BuildConfig.SPOTIFY_REDIRECT_URI)
-            .showAuthView(true)
+            .showAuthView(false)
             .build()
         SpotifyAppRemote.connect(activity, params, object : Connector.ConnectionListener {
             override fun onConnected(remote: SpotifyAppRemote) {
@@ -166,8 +199,10 @@ class SpotifyController @Inject constructor(
         }
     }
 
-    private companion object {
-        const val PREFERENCES_NAME = "spotify_preferences"
-        const val KEY_PLAYLIST_URI = "playlist_uri"
+    companion object {
+        const val AUTH_REQUEST_CODE = 1337
+        private const val PREFERENCES_NAME = "spotify_preferences"
+        private const val KEY_PLAYLIST_URI = "playlist_uri"
+        private const val APP_REMOTE_CONTROL_SCOPE = "app-remote-control"
     }
 }

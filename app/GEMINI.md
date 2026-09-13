@@ -706,7 +706,7 @@ O aplicativo deverá manter um único perfil pessoal local, separado da progress
 
 ## RF-18 — Integração opcional com Spotify
 
-A tela Informações deverá permitir salvar o link ou URI de uma playlist e autorizar o controle do aplicativo oficial do Spotify por meio do Spotify App Remote. Quando houver playlist configurada, a tela Hoje deverá exibir um player compacto com música e artista atuais, reprodução da playlist, pausa, retomada e troca de faixa. Ao iniciar um treino com o Spotify já conectado, a playlist configurada deverá começar automaticamente.
+A tela Informações deverá permitir salvar o link ou URI de uma playlist e autorizar o controle do aplicativo oficial do Spotify por meio do Spotify App Remote. A autorização deverá abrir explicitamente o fluxo do Spotify Auth para solicitar o escopo `app-remote-control`; somente após sua conclusão o App Remote deverá tentar conectar. Quando houver playlist configurada, a tela Hoje deverá exibir um player compacto com música e artista atuais, reprodução da playlist, pausa, retomada e troca de faixa. Ao iniciar um treino com o Spotify já conectado, a playlist configurada deverá começar automaticamente.
 
 O Client ID deverá ser fornecido no momento do build e nunca armazenado diretamente no código-fonte. A integração deverá permanecer desabilitada quando ele não estiver configurado. A ausência do aplicativo Spotify, de autorização ou de conexão não deverá impedir a criação ou execução de treinos nem qualquer funcionalidade de gamificação.
 

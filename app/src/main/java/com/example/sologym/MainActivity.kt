@@ -1,5 +1,6 @@
 package com.example.sologym
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -80,5 +81,13 @@ class MainActivity : ComponentActivity() {
     override fun onStop() {
         spotifyController.disconnect()
         super.onStop()
+    }
+
+    @Deprecated("Spotify Auth SDK still returns its result through onActivityResult")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == SpotifyController.AUTH_REQUEST_CODE) {
+            spotifyController.handleAuthorizationResult(this, resultCode, data)
+        }
     }
 }

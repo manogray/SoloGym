@@ -92,7 +92,7 @@ SPOTIFY_CLIENT_ID=seu_client_id
 
 Também é possível usar a variável de ambiente `SPOTIFY_CLIENT_ID` ou o argumento Gradle `-PSPOTIFY_CLIENT_ID=...`. Sem essa configuração, o restante do aplicativo compila e funciona normalmente, mas a conexão com o Spotify permanece desabilitada.
 
-O projeto inclui o Spotify App Remote SDK `0.8.0` em `app/libs`. Seu SHA-256 é `b5a6dd880eaf01f63a871cba9ef7af77c341f8a94ffc8fdf2e9021f9a9d4c198`.
+O projeto inclui o Spotify App Remote SDK `0.8.0` em `app/libs` e utiliza o Spotify Auth `5.0.0` para abrir explicitamente a autorização do escopo `app-remote-control` antes da conexão. O SHA-256 do AAR local é `b5a6dd880eaf01f63a871cba9ef7af77c341f8a94ffc8fdf2e9021f9a9d4c198`.
 
 No Windows, compile o APK de desenvolvimento com:
 
