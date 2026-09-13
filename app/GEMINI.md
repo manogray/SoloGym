@@ -666,8 +666,10 @@ Em um dia sem treino programado, a aba Hoje deverá permitir selecionar e execut
 Ao atingir a experiência máxima:
 
 * incrementar o level em 1;
-* zerar a experiência atual;
+* descontar da experiência atual somente o valor exigido pelo level concluído, preservando o excedente;
 * aumentar a experiência máxima em 20%.
+
+Caso o excedente também alcance a meta seguinte, o processo deverá se repetir até que a experiência atual fique abaixo da experiência máxima do novo level.
 
 Uma falha ocorre quando termina um dia que possuía treino programado e não existe treino concluído naquela data. Para cada falha:
 
@@ -3490,11 +3492,13 @@ Todas as telas deverão utilizar o mesmo padrão.
 
 Estrutura:
 
-Título
+Imagem horizontal específica da página, carregada a partir de `drawable`
 
 ↓
 
-Botões de ação (quando necessário)
+Botão do menu lateral
+
+As imagens utilizadas serão `daily.png`, `trainings.png`, `exercises.png`, `player.png` e `info.png`. O `SoloTopBar` deverá receber somente o recurso da imagem da página, além da ação de abertura do menu.
 
 ---
 

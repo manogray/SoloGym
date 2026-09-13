@@ -32,17 +32,20 @@ object PlayerProgression {
         experience: Int,
         incrementStreak: Boolean
     ): Player {
-        val earnedExperience = player.experienciaAtual + experience
-        val leveledUp = earnedExperience >= player.experienciaMaxima
+        var currentExperience = player.experienciaAtual + experience
+        var currentLevel = player.level
+        var maximumExperience = player.experienciaMaxima
+
+        while (currentExperience >= maximumExperience) {
+            currentExperience -= maximumExperience
+            currentLevel += 1
+            maximumExperience = ceil(maximumExperience * LEVEL_XP_MULTIPLIER).toInt()
+        }
 
         return player.copy(
-            level = if (leveledUp) player.level + 1 else player.level,
-            experienciaAtual = if (leveledUp) 0 else earnedExperience,
-            experienciaMaxima = if (leveledUp) {
-                ceil(player.experienciaMaxima * LEVEL_XP_MULTIPLIER).toInt()
-            } else {
-                player.experienciaMaxima
-            },
+            level = currentLevel,
+            experienciaAtual = currentExperience,
+            experienciaMaxima = maximumExperience,
             streakTreinos = if (incrementStreak) {
                 player.streakTreinos + 1
             } else {

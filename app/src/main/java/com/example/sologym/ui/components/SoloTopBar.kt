@@ -1,7 +1,7 @@
 package com.example.sologym.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,15 +16,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.annotation.DrawableRes
 import com.example.sologym.ui.theme.*
 
 @Composable
 fun SoloTopBar(
-    title: String,
-    icon: ImageVector,
+    @DrawableRes imageRes: Int,
     onMenuClick: (() -> Unit)? = null,
 ) {
     Box(
@@ -67,16 +67,14 @@ fun SoloTopBar(
         }
         Row(
             modifier = Modifier.align(Alignment.Center),
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                imageVector = icon,
+            Image(
+                painter = painterResource(imageRes),
                 contentDescription = null,
-                modifier = Modifier.size(36.dp),
-                tint = FullWhite
+                modifier = Modifier.height(48.dp),
+                contentScale = ContentScale.Fit,
             )
-            Text(title)
         }
     }
 }

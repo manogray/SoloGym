@@ -34,7 +34,7 @@ O aplicativo está dividido em cinco áreas:
 
 ## Gamificação
 
-O aplicativo mantém um único Player local. Ele começa no level 1, com `0 / 100 XP`. Cada treino programado concluído concede 30 XP e aumenta o streak em um. Em dias sem treino programado, o usuário pode escolher e realizar um dos treinos cadastrados voluntariamente, recebendo 20 XP sem alterar o streak. Se nenhum treino for realizado no dia livre, o descanso concede 15 XP após o término do dia, também sem alterar o streak. Ao atingir a experiência máxima, o level aumenta, a experiência atual volta a zero e a próxima meta cresce 20%.
+O aplicativo mantém um único Player local. Ele começa no level 1, com `0 / 100 XP`. Cada treino programado concluído concede 30 XP e aumenta o streak em um. Em dias sem treino programado, o usuário pode escolher e realizar um dos treinos cadastrados voluntariamente, recebendo 20 XP sem alterar o streak. Se nenhum treino for realizado no dia livre, o descanso concede 15 XP após o término do dia, também sem alterar o streak. Ao atingir a experiência máxima, o level aumenta, a meta seguinte cresce 20% e qualquer XP excedente permanece disponível no novo level.
 
 Cada treino programado pode ser concluído apenas uma vez por dia. A aba Hoje consulta o histórico da data e passa a exibir a missão como concluída, enquanto o histórico e a recompensa do Player são salvos juntos para evitar XP duplicada.
 

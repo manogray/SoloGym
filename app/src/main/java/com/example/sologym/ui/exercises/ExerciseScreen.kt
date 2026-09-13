@@ -7,8 +7,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.FitnessCenter
-import androidx.compose.material.icons.outlined.Assignment
-import androidx.compose.material.icons.outlined.FitnessCenter
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -57,8 +55,7 @@ fun ExerciseScreen(
     Scaffold(
         topBar = {
             SoloTopBar(
-                "EXERCÍCIOS",
-                Icons.Outlined.FitnessCenter,
+                imageRes = com.example.sologym.R.drawable.exercises,
                 onMenuClick = onOpenDrawer,
             )
         },

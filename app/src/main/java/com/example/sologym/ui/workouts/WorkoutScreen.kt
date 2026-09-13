@@ -6,7 +6,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.EventNote
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.automirrored.outlined.Assignment
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -32,8 +31,7 @@ fun WorkoutScreen(
     Scaffold(
         topBar = {
             SoloTopBar(
-                "TREINOS",
-                Icons.AutoMirrored.Outlined.Assignment,
+                imageRes = com.example.sologym.R.drawable.trainings,
                 onMenuClick = onOpenDrawer,
             )
         },

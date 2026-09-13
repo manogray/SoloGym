@@ -56,9 +56,24 @@ class PlayerProgressionTest {
         val result = PlayerProgression.completedWorkout(player)
 
         assertEquals(2, result.level)
-        assertEquals(0, result.experienciaAtual)
+        assertEquals(10, result.experienciaAtual)
         assertEquals(120, result.experienciaMaxima)
         assertEquals(5, result.streakTreinos)
+    }
+
+    @Test
+    fun excessExperienceCanAdvanceMultipleLevels() {
+        val player = Player(
+            level = 1,
+            experienciaAtual = 330,
+            experienciaMaxima = 100,
+        )
+
+        val result = PlayerProgression.completedWorkout(player)
+
+        assertEquals(3, result.level)
+        assertEquals(140, result.experienciaAtual)
+        assertEquals(144, result.experienciaMaxima)
     }
 
     @Test

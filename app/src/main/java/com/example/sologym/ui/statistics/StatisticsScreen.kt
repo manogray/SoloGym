@@ -2,9 +2,6 @@ package com.example.sologym.ui.statistics
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.Canvas
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.PersonPin
-import androidx.compose.material.icons.outlined.Assignment
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
@@ -64,8 +61,7 @@ fun StatisticsScreen(
     Scaffold(
         topBar = {
             SoloTopBar(
-                "JOGADOR",
-                Icons.Outlined.PersonPin,
+                imageRes = com.example.sologym.R.drawable.player,
                 onMenuClick = onOpenDrawer,
             )
         },

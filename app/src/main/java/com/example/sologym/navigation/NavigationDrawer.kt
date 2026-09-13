@@ -12,6 +12,12 @@ import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.outlined.FitnessCenter
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import com.example.sologym.R
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -76,10 +82,14 @@ fun SoloGymNavigationDrawerContent(
         drawerContainerColor = DarkBlue,
         drawerContentColor = FullWhite,
     ) {
-        Text(
-            text = "SOLO GYM",
-            style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(horizontal = 28.dp, vertical = 32.dp),
+        Image(
+            painter = painterResource(R.drawable.solo_gym_logo),
+            contentDescription = "Solo Gym",
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(120.dp)
+                .padding(16.dp),
+            contentScale = ContentScale.Fit
         )
         HorizontalDivider(color = LightBlue)
 

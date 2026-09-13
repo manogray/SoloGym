@@ -13,8 +13,6 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
@@ -129,8 +127,7 @@ fun InformationScreen(
     Scaffold(
         topBar = {
             SoloTopBar(
-                title = "INFORMAÇÕES",
-                icon = Icons.Outlined.Info,
+                imageRes = com.example.sologym.R.drawable.info,
                 onMenuClick = onOpenDrawer,
             )
         },

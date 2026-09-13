@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.NewReleases
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -120,8 +119,7 @@ fun HomeScreen(
     Scaffold(
         topBar = {
             SoloTopBar(
-                "MISSÃO DIÁRIA",
-                Icons.Outlined.NewReleases,
+                imageRes = com.example.sologym.R.drawable.daily,
                 onMenuClick = onOpenDrawer,
             )
         }
@@ -135,6 +133,20 @@ fun HomeScreen(
             if (uiState.isLoading) {
                 Box(modifier = Modifier.fillMaxSize()) {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                }
+            } else if (uiState.isCompletedToday) {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    Column(
+                        modifier = Modifier.align(Alignment.Center),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = "MISSÃO CONCLUÍDA",
+                            style = MaterialTheme.typography.headlineMedium
+                        )
+                        Text("TREINO REALIZADO HOJE")
+                    }
                 }
             } else if (uiState.todayWorkout == null) {
                 Box(modifier = Modifier.fillMaxSize()) {
@@ -160,20 +172,6 @@ fun HomeScreen(
                                 Text("ESCOLHER UM TREINO")
                             }
                         }
-                    }
-                }
-            } else if (uiState.isCompletedToday) {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    Column(
-                        modifier = Modifier.align(Alignment.Center),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Text(
-                            text = "MISSÃO CONCLUÍDA",
-                            style = MaterialTheme.typography.headlineMedium
-                        )
-                        Text("TREINO REALIZADO HOJE")
                     }
                 }
             } else {

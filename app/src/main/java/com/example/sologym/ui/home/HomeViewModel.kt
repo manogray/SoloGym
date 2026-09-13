@@ -80,28 +80,16 @@ class HomeViewModel @Inject constructor(
                     } else {
                         val workout = source.scheduledWorkout ?: source.workouts
                             .firstOrNull { it.treino.id == source.selectedWorkoutId }
-                        if (workout == null) {
-                            flowOf(
+                        historyRepository.observeAnyWorkoutCompletedOnDate(today)
+                            .map { completed ->
                                 HomeLoadResult(
-                                    workout = null,
-                                    completedToday = false,
+                                    workout = workout,
+                                    completedToday = completed,
                                     activeSession = null,
                                     availableWorkouts = source.workouts,
                                     isRestDay = isRestDay
                                 )
-                            )
-                        } else {
-                            historyRepository.observeAnyWorkoutCompletedOnDate(today)
-                                .map { completed ->
-                                    HomeLoadResult(
-                                        workout = workout,
-                                        completedToday = completed,
-                                        activeSession = null,
-                                        availableWorkouts = source.workouts,
-                                        isRestDay = isRestDay
-                                    )
-                                }
-                        }
+                            }
                     }
                 }
                 .onEach { result ->
