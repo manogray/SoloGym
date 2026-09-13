@@ -59,9 +59,6 @@ android {
 }
 
 dependencies {
-    implementation(files("libs/spotify-app-remote-release-0.8.0.aar"))
-    implementation("com.spotify.android:auth:5.0.0")
-    implementation("com.google.code.gson:gson:2.11.0")
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)
