@@ -29,7 +29,8 @@ object DatabaseModule {
                 SoloGymDatabase.MIGRATION_3_4,
                 SoloGymDatabase.MIGRATION_4_5,
                 SoloGymDatabase.MIGRATION_5_6,
-                SoloGymDatabase.MIGRATION_6_7
+                SoloGymDatabase.MIGRATION_6_7,
+                SoloGymDatabase.MIGRATION_7_8
             )
             .build()
     }

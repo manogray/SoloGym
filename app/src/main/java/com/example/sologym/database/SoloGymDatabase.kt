@@ -22,7 +22,7 @@ import com.example.sologym.database.entity.*
         PlayerProfile::class,
         BodyMeasurement::class
     ],
-    version = 7,
+    version = 8,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -168,6 +168,17 @@ abstract class SoloGymDatabase : RoomDatabase() {
                 )
                 db.execSQL("DROP TABLE player_profile")
                 db.execSQL("ALTER TABLE player_profile_new RENAME TO player_profile")
+            }
+        }
+
+        val MIGRATION_7_8 = object : Migration(7, 8) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "ALTER TABLE exercicio ADD COLUMN tipo TEXT NOT NULL DEFAULT 'STRENGTH'"
+                )
+                db.execSQL(
+                    "ALTER TABLE exercicio ADD COLUMN duracaoMinutos INTEGER"
+                )
             }
         }
     }

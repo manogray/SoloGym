@@ -2,6 +2,7 @@ package com.example.sologym.database.converter
 
 import androidx.room.TypeConverter
 import com.example.sologym.model.WorkoutStatus
+import com.example.sologym.model.ExerciseType
 import java.time.DayOfWeek
 import java.time.LocalDateTime
 import java.time.LocalDate
@@ -45,4 +46,11 @@ class Converters {
     fun workoutStatusToString(status: WorkoutStatus?): String? {
         return status?.name
     }
+
+    @TypeConverter
+    fun fromExerciseType(value: String?): ExerciseType? =
+        value?.let(ExerciseType::valueOf)
+
+    @TypeConverter
+    fun exerciseTypeToString(type: ExerciseType?): String? = type?.name
 }

@@ -6,7 +6,8 @@ O Solo Gym permite cadastrar exercícios personalizados, montar treinos para os 
 
 ## Funcionalidades
 
-- Cadastro, edição e exclusão de exercícios.
+- Cadastro, edição e exclusão de exercícios de força e aeróbicos.
+- Exercícios aeróbicos predefinidos (caminhada, corrida, bicicleta, elíptico e escada) com duração em minutos.
 - Configuração de repetições e carga individual para cada série.
 - Configuração do tempo de descanso entre séries.
 - Definição de exercícios substitutos.

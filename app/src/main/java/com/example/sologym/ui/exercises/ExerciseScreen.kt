@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.foundation.BorderStroke
 import com.example.sologym.ui.components.SoloTopBar
 import com.example.sologym.ui.theme.*
+import com.example.sologym.model.ExerciseType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -97,11 +98,20 @@ fun ExerciseScreen(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text(
-                                text = exercise.nome,
-                                style = MaterialTheme.typography.titleMedium,
-                                modifier = Modifier.weight(1f)
-                            )
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = exercise.nome,
+                                    style = MaterialTheme.typography.titleMedium,
+                                )
+                                Text(
+                                    text = if (exercise.tipo == ExerciseType.AEROBIC) {
+                                        "AERÓBICO • ${exercise.duracaoMinutos ?: 0} MIN"
+                                    } else {
+                                        "FORÇA"
+                                    },
+                                    style = MaterialTheme.typography.bodySmall,
+                                )
+                            }
                             IconButton(onClick = { viewModel.onDeleteClick(exercise) }) {
                                 Icon(
                                     imageVector = Icons.Default.Delete,

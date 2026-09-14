@@ -14,7 +14,7 @@ O **Solo Gym** é um aplicativo Android desenvolvido em **Kotlin** utilizando **
 
 O aplicativo deve permitir que o usuário:
 
-* Cadastre exercícios personalizados;
+* Cadastre exercícios de força personalizados e exercícios aeróbicos predefinidos;
 * Configure repetições e carga individualmente para cada série;
 * Organize esses exercícios em treinos separados por dia da semana;
 * Execute o treino diário;
@@ -424,11 +424,10 @@ O aplicativo deverá permitir o cadastro de exercícios personalizados.
 
 Cada exercício deverá possuir obrigatoriamente:
 
-* Nome
-* Tempo de descanso entre séries (em segundos)
-* Lista de séries
-* Repetições e carga de cada série
-* Lista de exercícios substitutos (opcional)
+* Tipo: força ou aeróbico;
+* Nome.
+
+Exercícios de força deverão possuir tempo de descanso, lista de séries, repetições e carga por série e poderão possuir substitutos. Exercícios aeróbicos deverão usar um dos nomes predefinidos — caminhada, corrida, bicicleta, elíptico ou escada — e possuir duração em minutos, sem séries, carga, descanso ou substitutos.
 
 Cada exercício deverá possuir um identificador único gerado automaticamente pelo banco de dados.
 
@@ -446,6 +445,8 @@ Será permitido alterar:
 * Carga de cada série
 * Tempo de descanso
 * Exercícios substitutos
+
+O tipo será definido durante a criação e não poderá ser alterado posteriormente. Os campos editáveis deverão respeitar esse tipo. O nome do exercício aeróbico continuará restrito às opções predefinidas e sua duração deverá ser positiva.
 
 As alterações deverão refletir automaticamente em todos os treinos que utilizam aquele exercício.
 
@@ -1677,6 +1678,8 @@ Representa um exercício que poderá ser reutilizado em diversos treinos.
 | id               | Long   | Sim         | Identificador único            |
 | nome             | String | Sim         | Nome do exercício              |
 | descansoSegundos | Int    | Sim         | Tempo de descanso entre séries |
+| tipo             | ExerciseType | Sim   | `STRENGTH` ou `AEROBIC`        |
+| duracaoMinutos   | Int?   | Não         | Duração do exercício aeróbico  |
 
 ---
 
@@ -1684,8 +1687,10 @@ Representa um exercício que poderá ser reutilizado em diversos treinos.
 
 * O nome não poderá ser vazio.
 * O nome deverá possuir no máximo 100 caracteres.
-* O descanso deverá ser maior que zero.
-* Um exercício deverá possuir pelo menos uma série.
+* Para força, o descanso deverá ser maior que zero e deverá existir pelo menos uma série.
+* Para aeróbico, o nome deverá ser caminhada, corrida, bicicleta, elíptico ou escada e a duração deverá ser maior que zero.
+* Exercícios aeróbicos não deverão possuir séries, descanso ou substitutos.
+* Registros anteriores à inclusão do tipo deverão migrar como `STRENGTH`.
 
 ---
 
@@ -2753,7 +2758,7 @@ O sistema deverá impedir o salvamento.
 
 ---
 
-### Nenhuma série cadastrada
+### Nenhuma série cadastrada em exercício de força
 
 O sistema deverá impedir o salvamento.
 
@@ -3094,7 +3099,7 @@ Essas regras possuem prioridade sobre qualquer decisão de implementação.
 
 ### RN-01
 
-Todo exercício deverá possuir pelo menos uma série.
+Todo exercício de força deverá possuir pelo menos uma série. Exercícios aeróbicos não possuirão séries.
 
 ---
 
@@ -3106,7 +3111,7 @@ Não permitir nomes vazios.
 
 ### RN-03
 
-Não permitir tempo de descanso menor ou igual a zero.
+Não permitir tempo de descanso menor ou igual a zero em exercícios de força.
 
 ---
 

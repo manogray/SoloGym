@@ -7,6 +7,8 @@ import com.example.sologym.database.dao.WorkoutExerciseDao
 import com.example.sologym.database.entity.Exercicio
 import com.example.sologym.database.entity.ExercicioSubstituto
 import com.example.sologym.database.entity.Serie
+import com.example.sologym.model.AerobicExercise
+import com.example.sologym.model.ExerciseType
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -23,6 +25,7 @@ class ExerciseRepository @Inject constructor(
     suspend fun getCompleteExercise(id: Long) = exerciseDao.getCompleteById(id)
 
     suspend fun insertExercise(exercicio: Exercicio, series: List<Serie>, substitutos: List<Long>): Long {
+        validateExercise(exercicio, series, substitutos)
         val exerciseId = exerciseDao.insert(exercicio)
         
         val seriesWithId = series.map { it.copy(exercicioId = exerciseId) }
@@ -35,6 +38,7 @@ class ExerciseRepository @Inject constructor(
     }
 
     suspend fun updateExercise(exercicio: Exercicio, series: List<Serie>, substitutos: List<Long>) {
+        validateExercise(exercicio, series, substitutos)
         exerciseDao.update(exercicio)
         
         seriesDao.deleteByExerciseId(exercicio.id)
@@ -49,5 +53,30 @@ class ExerciseRepository @Inject constructor(
             throw IllegalStateException("Não é possível excluir: o exercício faz parte de um ou mais treinos.")
         }
         exerciseDao.delete(exercicio)
+    }
+
+    private fun validateExercise(
+        exercicio: Exercicio,
+        series: List<Serie>,
+        substitutos: List<Long>,
+    ) {
+        require(exercicio.nome.isNotBlank()) { "Nome é obrigatório." }
+        when (exercicio.tipo) {
+            ExerciseType.STRENGTH -> {
+                require(exercicio.descansoSegundos > 0) { "Descanso inválido." }
+                require(series.isNotEmpty()) { "O exercício deve possuir ao menos uma série." }
+                require(exercicio.duracaoMinutos == null) {
+                    "Exercícios de força não possuem duração aeróbica."
+                }
+            }
+            ExerciseType.AEROBIC -> {
+                require(AerobicExercise.entries.any { it.displayName == exercicio.nome }) {
+                    "Exercício aeróbico inválido."
+                }
+                require((exercicio.duracaoMinutos ?: 0) > 0) { "Duração inválida." }
+                require(series.isEmpty()) { "Exercícios aeróbicos não possuem séries." }
+                require(substitutos.isEmpty()) { "Exercícios aeróbicos não possuem substitutos." }
+            }
+        }
     }
 }

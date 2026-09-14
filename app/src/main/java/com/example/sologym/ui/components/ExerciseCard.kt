@@ -12,6 +12,7 @@ import com.example.sologym.ui.theme.*
 import androidx.compose.ui.text.style.TextDecoration
 import com.example.sologym.database.entity.Exercicio
 import com.example.sologym.database.entity.Serie
+import com.example.sologym.model.ExerciseType
 
 @Composable
 fun ExerciseCard(
@@ -51,26 +52,35 @@ fun ExerciseCard(
                         TextDecoration.LineThrough
                     else null
                 )
-                Text(
-                    text = "DESCANSO: ${exercicio.descansoSegundos}s",
-                    style = MaterialTheme.typography.bodySmall
-                )
+                if (exercicio.tipo == ExerciseType.AEROBIC) {
+                    Text(
+                        text = "DURAÇÃO: ${exercicio.duracaoMinutos ?: 0} MIN",
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                } else {
+                    Text(
+                        text = "DESCANSO: ${exercicio.descansoSegundos}s",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
                 if (substitutedFor != null) {
                     Text(
                         text = "NO LUGAR DE $substitutedFor",
                         style = MaterialTheme.typography.labelSmall
                     )
                 }
-                series.sortedBy { it.ordem }.forEach { serie ->
-                    Text(
-                        text = "SÉRIE ${serie.ordem}: ${serie.repeticoes} REPS • ${serie.carga.formatCarga()} KG",
-                        style = MaterialTheme.typography.bodySmall
-                    )
+                if (exercicio.tipo == ExerciseType.STRENGTH) {
+                    series.sortedBy { it.ordem }.forEach { serie ->
+                        Text(
+                            text = "SÉRIE ${serie.ordem}: ${serie.repeticoes} REPS • ${serie.carga.formatCarga()} KG",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
                 }
             }
             
             Row(verticalAlignment = Alignment.CenterVertically) {
-                if (hasSubstitutes) {
+                if (exercicio.tipo == ExerciseType.STRENGTH && hasSubstitutes) {
                     TextButton(onClick = onSubstitutesClick) {
                         Text("SUBSTITUIÇÕES", color = FullWhite, textDecoration = TextDecoration.Underline)
                     }
